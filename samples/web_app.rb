@@ -74,22 +74,10 @@ get '/logout' do
 end
 
 get '/auth' do
-  # Request authorization by redirecting the user.
-  redirect authorization_endpoint.to_s, 303
-end
-
-# The authorization code is obtained from the authorization server without ADAL.
-def authorization_endpoint
-  path = '/' + TENANT + '/oauth2/authorize'
-  query = URI.encode_www_form(response_type: 'code id_token',
-                              scope: 'openid',
-                              response_mode: 'form_post',
-                              redirect_uri: uri,
-                              client_id: CLIENT_ID,
-                              resource: RESOURCE,
-                              nonce: SecureRandom.uuid,
-                              site_id: SITE_ID)
-  URI::HTTPS.build(host: AUTHORITY, path: path, query: query)
+  # Request authorization by redirecting the user. ADAL will help create the
+  # URL, but it will not make the actual request for you. In this case, the
+  # request is made by Sinatra's redirect function.
+  redirect auth_ctx.authorization_request_url(RESOURCE, CLIENT_ID, uri), 303
 end
 
 # The authorization code is returned from the authorization server as

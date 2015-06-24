@@ -41,9 +41,17 @@ module ADAL
     ##
     # URI that can be used to acquire authorization codes.
     #
+    # @optional Hash params
+    #   Query parameters that will added to the endpoint.
     # @return [URI]
-    def authorize_endpoint
-      URI::HTTPS.build(host: @host, path: '/' + @tenant + AUTHORIZE_PATH)
+    def authorize_endpoint(params = nil)
+      if params.nil?
+        URI::HTTPS.build(host: @host, path: '/' + @tenant + AUTHORIZE_PATH)
+      else
+        URI::HTTPS.build(host: @host,
+                         path: '/' + @tenant + AUTHORIZE_PATH,
+                         query: URI.encode_www_form(params))
+      end
     end
 
     ##

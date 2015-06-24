@@ -1,5 +1,6 @@
 require_relative './authority'
 require_relative './memory_cache'
+require_relative './request_parameters'
 require_relative './token_request'
 require_relative './util'
 
@@ -10,6 +11,7 @@ module ADAL
   # users, multiple resources and multiple means of authentication. Each
   # AuthenticationContext is specific to a tenant.
   class AuthenticationContext
+    include RequestParameters
     include Util
 
     def initialize(authority_uri, tenant, options = {})
@@ -101,12 +103,35 @@ module ADAL
     # @param ClientCredential|ClientAssertion|ClientAssertionCertificate
     #   An object that validates the client application by adding
     #   #request_params to the OAuth request.
-    # @param UserIdentifier
+    # @param UserIdentifier user_id
     #   The identifier of the user that the token is being requested for.
     # @return [TokenResponse]
     def acquire_token_with_username_identifier(resource, client_cred, user_id)
       fail_if_arguments_nil(resource, client_cred, user_id)
       fail NotImplementedError
+    end
+
+    ##
+    # Constructs a URL for an authorization endpoint using query parameters.
+    #
+    # @param String resource
+    #   The intended recipient of the requested token.
+    # @param String client_id
+    #   The identifier of the calling client application.
+    # @param URI redirect_uri
+    #   The URI that the the authorization code should be sent back to.
+    # @optional Hash extra_query_params
+    #   Any remaining query parameters to add to the URI.
+    # @return URI
+    def authorization_request_url(
+      resource, client_id, redirect_uri, extra_query_params = {})
+      @authority.authorize_endpoint(
+        extra_query_params.reverse_merge(
+          client_id: client_id,
+          response_mode: FORM_POST,
+          redirect_uri: redirect_uri,
+          resource: resource,
+          response_type: CODE))
     end
 
     private

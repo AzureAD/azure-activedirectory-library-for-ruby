@@ -3,18 +3,19 @@ module ADAL
   # class to reference the parameters instead of referring to them as strings
   # or symbols
   module RequestParameters
-    GRANT_TYPE = 'grant_type'
+    AAD_API_VERSION = 'api-version'
+    ASSERTION = 'assertion'
     CLIENT_ASSERTION = 'client_assertion'
     CLIENT_ID = 'client_id'
     CLIENT_SECRET = 'client_secret'
-    REDIRECT_URI = 'redirect_uri'
-    RESOURCE = 'resource'
     CODE = 'code'
-    SCOPE = 'scope'
-    ASSERTION = 'assertion'
-    AAD_API_VERSION = 'api-version'
-    USERNAME = 'username'
+    FORM_POST = 'form_post'
+    GRANT_TYPE = 'grant_type'
     PASSWORD = 'password'
+    REDIRECT_URI = 'redirect_uri'
     REFRESH_TOKEN = 'refresh_token'
+    RESOURCE = 'resource'
+    SCOPE = 'scope'
+    USERNAME = 'username'
   end
 end

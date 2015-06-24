@@ -1,3 +1,6 @@
+# All of the data that the fake token and authority endpoints support. It is
+# separated into its own module so that it can be used as a mix-in in test
+# classes.
 module FakeData
   AUTH_CODE = 'auth_code_1'
   AUTHORITY = 'login.windows.net'

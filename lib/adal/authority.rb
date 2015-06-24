@@ -14,7 +14,7 @@ module ADAL
       'login.chinacloudapi.cn',
       'login.cloudgovapi.us'
     ]
-    WORLD_WIDE_AUTHORITY = 'login.windows.net'
+    WORLD_WIDE_AUTHORITY = 'login.microsoftonline.net'
 
     attr_reader :host
     attr_reader :tenant

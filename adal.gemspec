@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.files += Dir['lib/*.rb']
   s.files += Dir['lib/adal/*.rb']
 
-  s.author = 'Adam Michael'
-  s.email = 't-admich@microsoft.com'
+  s.author = 'Microsoft Open Technologies Inc'
+  s.homepage = 'https://msopentech.com'
+  s.email = 'msopentech@microsoft.com'
 end

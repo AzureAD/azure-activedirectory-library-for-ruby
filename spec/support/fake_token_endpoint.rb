@@ -24,7 +24,7 @@ class FakeTokenEndpoint < Sinatra::Base
     if TENANT != params[:tenant] || CLIENT_ID != params[:client_id]
       error_oauth_response(ErrorResponseCodes::INVALID_CLIENT)
     elsif params.key?('code') && AUTH_CODE == params['code'] &&
-      REDIRECT_URI == params['redirect_uri']
+          REDIRECT_URI == params['redirect_uri']
       successful_oauth_response
     elsif params['code']
       error_oauth_response(ErrorResponseCodes::INVALID_GRANT)
@@ -33,7 +33,7 @@ class FakeTokenEndpoint < Sinatra::Base
     elsif params['refresh_token']
       error_oauth_response(ErrorResponseCodes::UNAUTHORIZED_CLIENT)
     elsif params['client_secret'] && CLIENT_SECRET == params['client_secret']
-      successful_oauth_response 
+      successful_oauth_response
     elsif params.key? 'client_secret'
       error_oauth_response(ErrorResponseCodes::INVALID_CLIENT)
     else

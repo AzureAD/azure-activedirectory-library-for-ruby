@@ -8,7 +8,7 @@
 # 4. Install ADAL with `gem install adal`.
 # 5. Start Sinatra with `ruby web_app.rb`.
 
-require_relative '../lib/adal'
+require 'adal'
 require 'json'
 require 'net/http'
 require 'securerandom'
@@ -16,15 +16,16 @@ require 'sinatra'
 require 'uri'
 
 AUTHORITY = 'login.windows.net'
-CLIENT_ID = 'd0644584-61de-4bca-98ab-e75af0ff5528'
-CLIENT_SECRET = 'La55NMCC2ouDu3grNO5/wlCjE7qmAV0YnJFFIOYVU6U='
+CLIENT_ID = 'your_client_id_here'
+CLIENT_SECRET = 'your_client_secret_here'
 RESOURCE = 'https://graph.windows.net'
-SITE_ID = 500_879
-TENANT = 'adamajmichael.onmicrosoft.com'
+SITE_ID = 500_500
+TENANT = 'your_tenant_here.onmicrosoft.com'
 
 # AuthenticationContext is specific to a tenant. Our application only cares
 # about one tenant, so we only need one AuthenticationContext.
 auth_ctx = ADAL::AuthenticationContext.new(AUTHORITY, TENANT)
+client_cred = ADAL::ClientCredential.new(CLIENT_ID, CLIENT_SECRET)
 
 configure do
   enable :sessions
@@ -95,7 +96,7 @@ end
 # params[:code]. We pass this to ADAL to acquire an access_token.
 post '/auth' do
   token_response = auth_ctx.acquire_token_with_authorization_code(
-    RESOURCE, CLIENT_ID, CLIENT_SECRET, params[:code], uri)
+    params[:code], uri, client_cred, RESOURCE)
   case token_response
   when ADAL::SuccessResponse
     # ADAL successfully exchanged the authorization code for an access_token.
@@ -116,7 +117,7 @@ end
 
 get '/refresh' do
   token_response = auth_ctx.acquire_token_with_refresh_token(
-    RESOURCE, CLIENT_ID, CLIENT_SECRET, uri, session[:refresh_token])
+    session[:refresh_token], client_cred, RESOURCE)
   session[:access_token] = token_response.access_token
   session[:refresh_token] = token_response.refresh_token
   redirect to('/secure')

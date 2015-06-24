@@ -10,7 +10,6 @@ module ADAL
 
     DEFAULT_CONTENT_TYPE = 'application/x-www-form-urlencoded'
     DEFAULT_ENCODING = 'utf8'
-    DEFAULT_SCOPE = 'openid'
     SSL_SCHEME = 'https'
 
     def initialize(endpoint, params)
@@ -33,7 +32,6 @@ module ADAL
 
     def default_parameters
       { encoding: DEFAULT_ENCODING,
-        scope: DEFAULT_SCOPE,
         Parameters::AAD_API_VERSION => AAD_API_VERSION }
     end
   end

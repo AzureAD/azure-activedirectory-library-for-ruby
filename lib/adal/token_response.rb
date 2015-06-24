@@ -30,8 +30,8 @@ module ADAL
 
     def initialize(opt)
       @access_token = opt['access_token']
-      @expires_in = opt['expires_in']
-      @expires_on = opt['expires_on']
+      @expires_in = opt['expires_in'].to_i
+      @expires_on = @expires_in + Time.now.to_i
       @refresh_token = opt['refresh_token']
       @scope = opt['scope']
       @token_type = opt['token_type']

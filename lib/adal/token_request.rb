@@ -8,6 +8,8 @@ module ADAL
   class TokenRequest
     include RequestParameters
 
+    # All accepted grant types. This module can be mixed-in to other classes
+    # that require them.
     module GrantTypes
       AUTHORIZATION_CODE = 'authorization_code'
       CLIENT_CREDENTIALS = 'client_credentials'
@@ -18,46 +20,44 @@ module ADAL
     # Constructs a TokenRequest.
     #
     # @param [Authority] authority
-    #   The Authority object containing the token and authorization endpoints.
-    # @param [String] client_id
-    #   The client id of the calling application.
-    # @param [String] resource
-    #   The resource that is being requested.
-    # @option opt [TokenCache] :token_cache
-    #   A cache that may be able to fulfill the request. If not provided,
-    #   a no-op cache that contains no tokens will be used.
-    # @option opt [String] :redirect_uri
-    #   The redirect uri that was used to obtain the previous token or
-    #   authorization code, if one was used.
-    def initialize(authority, client_id, resource, opt = {})
+    #   The Authority providing authorization and token endpoints.
+    # @param ClientCredential|ClientAssertion|ClientAssertionCertificate
+    #   Used to identify the client. Provides a request_parameters method
+    #   that yields the relevant client credential parameters.
+    # @option [TokenCache] token_cache
+    #   The cache implementation to store tokens. A NoopCache that stores no
+    #   tokens will be used by default.
+    def initialize(authority, client, token_cache = NoopCache.new)
       @authority = authority
-      @client_id = client_id
-      @resource = resource
-      @token_cache = opt[:token_cache] || NoopCache.new
-      @redirect_uri =
-        URI.parse(opt[:redirect_uri].to_s) if opt.key? :redirect_uri
+      @client = client
+      @token_cache = token_cache
     end
 
     public
 
-    # @return [TokenResponse]
-    def get_with_authorization_code(authorization_code, client_secret)
-      get(CLIENT_SECRET => client_secret,
-          CODE => authorization_code,
-          GRANT_TYPE => GrantTypes::AUTHORIZATION_CODE)
+    def client_params
+      @client.request_params
     end
 
     # @return [TokenResponse]
-    def get_with_client_credentials(client_secret)
-      get(CLIENT_SECRET => client_secret,
-          GRANT_TYPE => GrantTypes::CLIENT_CREDENTIALS)
+    def get_for_client(resource)
+      get_with_request_params(GRANT_TYPE => GrantTypes::CLIENT_CREDENTIALS,
+                              RESOURCE => resource)
     end
 
     # @return [TokenResponse]
-    def get_with_refresh_token(refresh_token, client_secret)
-      get(CLIENT_SECRET => client_secret,
-          GRANT_TYPE => GrantTypes::REFRESH_TOKEN,
-          REFRESH_TOKEN => refresh_token)
+    def get_with_authorization_code(auth_code, redirect_uri, resource = nil)
+      get_with_request_params(CODE => auth_code,
+                              GRANT_TYPE => GrantTypes::AUTHORIZATION_CODE,
+                              REDIRECT_URI => URI.parse(redirect_uri.to_s),
+                              RESOURCE => resource)
+    end
+
+    # @return [TokenResponse]
+    def get_with_refresh_token(refresh_token, resource = nil)
+      get_with_request_params(GRANT_TYPE => GrantTypes::REFRESH_TOKEN,
+                              REFRESH_TOKEN => refresh_token,
+                              RESOURCE => resource)
     end
 
     private
@@ -66,25 +66,19 @@ module ADAL
     # Applies the request, first by checking the cache and then with OAuth.
     #
     # @return TokenResponse
-    def get(opt)
-      check_cache || oauth_request(request_params.merge(opt)).get
-    end
-
-    def request_params
-      { CLIENT_ID => @client_id,
-        REDIRECT_URI => @redirect_uri,
-        RESOURCE => @resource }
+    def get_with_request_params(request_params)
+      all_params = client_params.merge(request_params).select { |_, v| !v.nil? }
+      check_cache || oauth_request(all_params).get
     end
 
     ##
-    # Attempts to fulfill the request from from @token_cache.
+    # Attempts to fulfill the request from @token_cache.
     #
     # @return TokenResponse
     #   If the cache contains a valid response it wil be returned as a
     #   SuccessResponse. Otherwise returns nil.
     def check_cache
-      return unless @token_cache.find(self)
-      fail NotImplementedError
+      @token_cache.find(self)
     end
 
     ##

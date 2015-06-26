@@ -4,9 +4,13 @@
 # To run this web app, you need to:
 # 1. Register a web application under your Azure Active Directory account.
 # 2. Replace CLIENT_ID, CLIENT_SECRET and TENANT with your values.
-# 3. Ensure that Ruby and Sinatra are installed on your system.
-# 4. Install ADAL with `gem install adal`.
-# 5. Start Sinatra with `ruby web_app.rb`.
+# 3. Have Ruby, Ruby-Dev and Bundler installed on your system
+# 4. Install ADAL dependencies with `bundler install`. This sample does not
+#    require any additional dependencies.
+# 5. Build the ADAL gem with `gem build adal.gemspec`.
+# 6. Install the ADAL gem with `gem install adal-0.0.0.gem`. This may require
+#    root permissions depending on how you install ruby.
+# 7. Start Sinatra with `ruby web_app.rb`.
 
 require 'adal'
 require 'json'

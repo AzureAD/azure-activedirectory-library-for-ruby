@@ -1,19 +1,38 @@
+require_relative './logging'
+
 require 'json'
 require 'jwt'
 
 module ADAL
   # The return type of all of the instance methods that return tokens.
   class TokenResponse
+    extend Logging
+
+    ##
+    # Constructs a TokenResponse from a raw hash. It will return either a
+    # SuccessResponse or an ErrorResponse depending on the fields of the hash.
+    #
+    # @param Hash raw_response
+    #   The body of the HTTP response expressed as a raw hash.
+    # @return TokenResponse
     def self.from_raw(raw_response)
+      logger.verbose('Attempting to create a TokenResponse from raw response ' \
+                     "#{raw_response}.")
       if raw_response['error']
+        logger.verbose('HTTP response identified as an ErrorResponse.')
         ErrorResponse.new(JSON.parse(raw_response))
       else
+        logger.verbose('HTTP response identified as a SuccessResponse.')
         SuccessResponse.new(JSON.parse(raw_response))
       end
     end
 
     public
 
+    ##
+    # Shorthand for checking if a token response is successful or failed.
+    #
+    # @return Boolean
     def error?
       self.respond_to? :error
     end

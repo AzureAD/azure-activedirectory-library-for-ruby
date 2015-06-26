@@ -1,12 +1,19 @@
+require_relative './logging'
+
+require 'json'
+require 'net/http'
 require 'uri'
 require 'uri_template'
 
 module ADAL
   # An authentication and token server with the ability to self validate.
   class Authority
+    include Logging
+
     AUTHORIZE_PATH = '/oauth2/authorize'
     DISCOVERY_TEMPLATE = URITemplate.new('https://{host}/common/discovery/' \
       'instance?authorization_endpoint={endpoint}&api-version=1.0')
+    TENANT_DISCOVERY_ENDPOINT_KEY = 'tenant_discovery_endpoint'
     TOKEN_PATH = '/oauth2/token'
     WELL_KNOWN_AUTHORITY_HOSTS = [
       'login.windows.net',
@@ -14,7 +21,7 @@ module ADAL
       'login.chinacloudapi.cn',
       'login.cloudgovapi.us'
     ]
-    WORLD_WIDE_AUTHORITY = 'login.microsoftonline.net'
+    WORLD_WIDE_AUTHORITY = 'login.microsoftonline.com'
 
     attr_reader :host
     attr_reader :tenant
@@ -81,20 +88,40 @@ module ADAL
 
     private
 
+    ##
+    # Creates an instance discovery endpoint url for authority that this object
+    # represents.
+    #
     # @return [URI]
-    def discovery_endpoint(host = WORLD_WIDE_AUTHORITY)
+    def discovery_uri(host = WORLD_WIDE_AUTHORITY)
       URI(DISCOVERY_TEMPLATE.expand(host: host, endpoint: authorize_endpoint))
     end
 
+    ##
+    # Performs instance discovery via a network call to well known authorities.
+    #
     # @return [String]
     #   The tenant discovery endpoint, if found. Otherwise nil.
     def validated_dynamically?
-      fail NotImplementedError
+      logger.verbose("Attempting instance discovery at: #{discovery_uri}.")
+      response = JSON.parse(Net::HTTP.get(discovery_uri))
+      unless response.key? TENANT_DISCOVERY_ENDPOINT_KEY
+        logger.error('Received unexpected response from instance discovery ' \
+                     "endpoint: #{response}. Unable to validate dynamically.")
+        return
+      end
+      logger.verbose('Authority validated via dynamic instance discovery.')
+      response[TENANT_DISCOVERY_ENDPOINT_KEY]
     end
 
     # @return [Boolean]
     def validated_statically?
-      WELL_KNOWN_AUTHORITY_HOSTS.include? @host
+      logger.verbose('Performing static instance discovery.')
+      found_it = WELL_KNOWN_AUTHORITY_HOSTS.include? @host
+      if found_it
+        logger.verbose('Authority validated via static instance discovery.')
+      end
+      found_it
     end
   end
 end

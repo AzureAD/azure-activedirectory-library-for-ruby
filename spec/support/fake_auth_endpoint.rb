@@ -1,3 +1,5 @@
+require_relative './fake_data'
+
 require 'sinatra/base'
 
 # An endpoint server that uses FakeData to respond to requests.

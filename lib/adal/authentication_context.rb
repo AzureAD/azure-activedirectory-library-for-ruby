@@ -1,10 +1,13 @@
 require_relative './authority'
+require_relative './core_ext'
 require_relative './memory_cache'
 require_relative './request_parameters'
 require_relative './token_request'
 require_relative './util'
 
 require 'uri'
+
+using ADAL::CoreExt
 
 module ADAL
   # Represents a directory in AAD. Can be used for multiple clients, multiple

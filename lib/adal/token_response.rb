@@ -17,7 +17,8 @@ module ADAL
     # @return TokenResponse
     def self.from_raw(raw_response)
       logger.verbose('Attempting to create a TokenResponse from raw response ' \
-                     "#{raw_response}.")
+                     'with SHA256 hash ' \
+                     "#{Digest::SHA256.hexdigest raw_response}.")
       if raw_response['error']
         logger.verbose('HTTP response identified as an ErrorResponse.')
         ErrorResponse.new(JSON.parse(raw_response))

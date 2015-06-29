@@ -7,6 +7,8 @@ module ADAL
     ASSERTION = 'assertion'
     CLIENT_ASSERTION = 'client_assertion'
     CLIENT_ID = 'client_id'
+    CLIENT_REQUEST_ID = 'client-request-id'
+    CLIENT_RETURN_CLIENT_REQUEST_ID = 'client-return-client-request-id'
     CLIENT_SECRET = 'client_secret'
     CODE = 'code'
     FORM_POST = 'form_post'

@@ -8,6 +8,17 @@ module ADAL
     DEFAULT_LOG_LEVEL = Logger::ERROR
     DEFAULT_LOG_OUTPUT = STDOUT
 
+    # Since Ruby ADAL is a blocking library, only one request will ever be
+    # running per thread. So the correlation id at any given time is unique
+    # to the thread. By storing it here, we don't need to worry about passing
+    # the correlation around between calling classes that may need it.
+    #
+    # The correlation id can be accessed as ADAL::Logging.correlation_id which
+    # will return the thread specific correlation id. This pattern is used by
+    # several well known Ruby libraries including ActiveRecord, the Model
+    # framework used by Rails.
+    @correlation_id = {}
+
     @log_level = DEFAULT_LOG_LEVEL
     @log_output = DEFAULT_LOG_OUTPUT
 
@@ -16,6 +27,18 @@ module ADAL
     class << self
       attr_accessor :log_level
       attr_accessor :log_output
+
+      def correlation_id=(val)
+        @correlation_id[Thread.current.object_id] = val
+      end
+
+      def correlation_id
+        @correlation_id[Thread.current.object_id]
+      end
+
+      def remove_correlation_id
+        @correlation_id.delete(Thread.current.object_id)
+      end
     end
 
     ##
@@ -64,7 +87,7 @@ module ADAL
     # @param output
     #   STDERR, STDOUT or the file name as a string.
     def logger
-      @logger ||= ADAL::Logger.new(Logging.log_output)
+      @logger ||= ADAL::Logger.new(Logging.log_output, Logging.correlation_id)
       @logger.level = Logging.log_level || DEFAULT_LOG_LEVEL
       @logger
     end

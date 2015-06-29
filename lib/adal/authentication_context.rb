@@ -5,17 +5,21 @@ require_relative './request_parameters'
 require_relative './token_request'
 require_relative './util'
 
+require 'securerandom'
 require 'uri'
 
 using ADAL::CoreExt
 
 module ADAL
-  # Represents a directory in AAD. Can be used for multiple clients, multiple
-  # users, multiple resources and multiple means of authentication. Each
-  # AuthenticationContext is specific to a tenant.
+  # Retrieves authentication tokens from Azure Active Directory and ADFS
+  # services. For most users, this is the primary class to authenticate an
+  # application.
   class AuthenticationContext
     include RequestParameters
     include Util
+
+    # The read method is nontrivial so it cannot be defined with a macro.
+    attr_writer :next_correlation_id
 
     def initialize(authority_uri, tenant, options = {})
       fail_if_arguments_nil(authority_uri, tenant)
@@ -38,8 +42,9 @@ module ADAL
     # @return [TokenResponse]
     def acquire_token_for_client(resource, client_cred)
       fail_if_arguments_nil(resource, client_cred)
-      TokenRequest.new(@authority, wrap_client_cred(client_cred))
-        .get_for_client(resource)
+      with_correlation_id do
+        token_request_for(client_cred).get_for_client(resource)
+      end
     end
 
     ##
@@ -59,8 +64,10 @@ module ADAL
     def acquire_token_with_authorization_code(
       auth_code, redirect_uri, client_cred, resource = nil)
       fail_if_arguments_nil(auth_code, redirect_uri, client_cred)
-      TokenRequest.new(@authority, client_cred).get_with_authorization_code(
-        auth_code, redirect_uri, resource)
+      with_correlation_id do
+        token_request_for(client_cred)
+          .get_with_authorization_code(auth_code, redirect_uri, resource)
+      end
     end
 
     ##
@@ -77,8 +84,10 @@ module ADAL
     def acquire_token_with_refresh_token(
       refresh_token, client_cred, resource = nil)
       fail_if_arguments_nil(refresh_token, client_cred)
-      TokenRequest.new(@authority, wrap_client_cred(client_cred))
-        .get_with_refresh_token(refresh_token, resource)
+      with_correlation_id do
+        token_request_for(client_cred)
+          .get_with_refresh_token(refresh_token, resource)
+      end
     end
 
     ##
@@ -137,7 +146,35 @@ module ADAL
           response_type: CODE))
     end
 
+    # The correlation id that will be used on the next request. It can be set
+    # with the attribute writer, but it is not necessary to use ADAL.
+    def next_correlation_id
+      @next_correlation_id ||= SecureRandom.uuid
+    end
+
     private
+
+    # Returns the current next_correlation_id and resets it so that it cannot be
+    # used again. There is no reason for a client to use this.
+    def next_correlation_id!
+      temp = next_correlation_id
+      @next_correlation_id = SecureRandom.uuid
+      temp
+    end
+
+    # Helper function for creating token requests based on client credentials
+    # and the current authentication context.
+    def token_request_for(client_cred)
+      TokenRequest.new(@authority, wrap_client_cred(client_cred))
+    end
+
+    # Sets the correlation_id on the logger for the duration of the call.
+    def with_correlation_id
+      Logging.correlation_id = next_correlation_id!
+      result = yield
+      Logging.remove_correlation_id
+      result
+    end
 
     def wrap_client_cred(client_cred)
       if client_cred.is_a? String

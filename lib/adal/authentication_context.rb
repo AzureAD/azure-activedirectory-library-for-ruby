@@ -1,15 +1,19 @@
 require_relative './authority'
+require_relative './core_ext'
 require_relative './memory_cache'
 require_relative './request_parameters'
 require_relative './token_request'
 require_relative './util'
 
+require 'securerandom'
 require 'uri'
 
+using ADAL::CoreExt
+
 module ADAL
-  # Represents a directory in AAD. Can be used for multiple clients, multiple
-  # users, multiple resources and multiple means of authentication. Each
-  # AuthenticationContext is specific to a tenant.
+  # Retrieves authentication tokens from Azure Active Directory and ADFS
+  # services. For most users, this is the primary class to authenticate an
+  # application.
   class AuthenticationContext
     include RequestParameters
     include Util
@@ -35,8 +39,7 @@ module ADAL
     # @return [TokenResponse]
     def acquire_token_for_client(resource, client_cred)
       fail_if_arguments_nil(resource, client_cred)
-      TokenRequest.new(@authority, wrap_client_cred(client_cred))
-        .get_for_client(resource)
+      token_request_for(client_cred).get_for_client(resource)
     end
 
     ##
@@ -56,8 +59,8 @@ module ADAL
     def acquire_token_with_authorization_code(
       auth_code, redirect_uri, client_cred, resource = nil)
       fail_if_arguments_nil(auth_code, redirect_uri, client_cred)
-      TokenRequest.new(@authority, client_cred).get_with_authorization_code(
-        auth_code, redirect_uri, resource)
+      token_request_for(client_cred)
+        .get_with_authorization_code(auth_code, redirect_uri, resource)
     end
 
     ##
@@ -74,7 +77,7 @@ module ADAL
     def acquire_token_with_refresh_token(
       refresh_token, client_cred, resource = nil)
       fail_if_arguments_nil(refresh_token, client_cred)
-      TokenRequest.new(@authority, wrap_client_cred(client_cred))
+      token_request_for(client_cred)
         .get_with_refresh_token(refresh_token, resource)
     end
 
@@ -134,7 +137,23 @@ module ADAL
           response_type: CODE))
     end
 
+    ##
+    # Sets the correlation id that will be used in all future request headers
+    # and logs.
+    #
+    # @param String value
+    #   The UUID to use as the correlation for all subsequent requests.
+    def correlation_id=(value)
+      Logging.correlation_id = value
+    end
+
     private
+
+    # Helper function for creating token requests based on client credentials
+    # and the current authentication context.
+    def token_request_for(client_cred)
+      TokenRequest.new(@authority, wrap_client_cred(client_cred))
+    end
 
     def wrap_client_cred(client_cred)
       if client_cred.is_a? String

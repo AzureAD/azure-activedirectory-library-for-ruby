@@ -8,6 +8,9 @@ require 'webmock/rspec'
 SimpleCov.start
 require 'adal'
 
+# Don't print any logs from ADAL::Logger.
+ADAL::Logging.log_output = '/dev/null'
+
 # Unit tests do not need network access. Any attempts to access the network
 # will throw exceptions.
 WebMock.disable_net_connect!(allow_localhost: true)

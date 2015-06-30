@@ -1,3 +1,4 @@
+require_relative './logging'
 require_relative './request_parameters'
 
 require 'net/http'
@@ -25,14 +26,34 @@ module ADAL
     # Requests and waits for a token from the endpoint.
     # @return TokenResponse
     def get
-      TokenResponse.from_raw(Net::HTTP.post_form(@endpoint_uri, @params).body)
+      request = Net::HTTP::Post.new(@endpoint_uri.path)
+      add_headers(request)
+      request.body = URI.encode_www_form(params)
+      TokenResponse.from_raw(http.request(request).body)
     end
 
     private
 
+    ##
+    # Adds the necessary OAuth headers.
+    #
+    # @param Net::HTTPGenericRequest
+    def add_headers(request)
+      return if Logging.correlation_id.nil?
+      request.add_field(CLIENT_REQUEST_ID, Logging.correlation_id)
+      request.add_field(CLIENT_RETURN_CLIENT_REQUEST_ID, true)
+    end
+
     def default_parameters
       { encoding: DEFAULT_ENCODING,
-        Parameters::AAD_API_VERSION => AAD_API_VERSION }
+        AAD_API_VERSION => '1.0' }
+    end
+
+    # Constructs an HTTP connection based on the instance with SSL if necessary.
+    def http
+      http_conn = Net::HTTP.new(@endpoint_uri.host, @endpoint_uri.port)
+      http_conn.use_ssl = true if @endpoint_uri.scheme == SSL_SCHEME
+      http_conn
     end
   end
 end

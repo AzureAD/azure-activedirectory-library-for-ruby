@@ -1,6 +1,64 @@
-require 'spec_helper'
+require_relative '../spec_helper'
 
 describe ADAL::Authority do
-  it 'should statically validate well known hosts' do
+  describe '#token_endpoint' do
+    it 'should correctly construct token endpoints' do
+      auth = ADAL::Authority.new('login.windows.net', 'atenant.onmicrosoft.com')
+      expect(auth.token_endpoint.to_s).to eq(
+        'https://login.windows.net/atenant.onmicrosoft.com/oauth2/token')
+    end
+  end
+
+  describe '#authorize_endpoint' do
+    it 'should correctly construct authorize endpoints' do
+      auth = ADAL::Authority.new('login.windows.net', 'atenant.onmicrosoft.com')
+      expect(auth.authorize_endpoint.to_s).to eq(
+        'https://login.windows.net/atenant.onmicrosoft.com/oauth2/authorize')
+    end
+  end
+
+  describe '#validate' do
+    it 'should not do anything if validate_authority was set to false in the ' \
+       ' constructor' do
+      auth = ADAL::Authority.new('login.windows.net', 'atenant.onmicrosoft.com')
+      expect(auth).to_not receive(:validated_statically?)
+      expect(auth).to_not receive(:validated_dynamically?)
+      expect(auth.validate).to be_truthy
+    end
+
+    it 'should attempt static validation before dynamic validation' do
+      auth = ADAL::Authority.new(
+        'login.windows.net', 'atenant.onmicrosoft.com', true)
+      expect(auth).to receive(:validated_statically?).once.and_return true
+      expect(auth).to_not receive(:validated_dynamically?)
+      expect(auth.validate).to be_truthy
+    end
+
+    it 'should successfully validate statically with a well known host' do
+      auth = ADAL::Authority.new(
+        'login.windows.net', 'atenant.onmicrosoft.com', true)
+      expect(auth).to_not receive(:validated_dynamically?)
+      expect(auth.validate).to be_truthy
+    end
+
+    it 'should successully validate dynamically with the discovery endpoint' do
+      auth = ADAL::Authority.new(
+        'someothersite.net', 'atenant.onmicrosoft.com', true)
+      expect(Net::HTTP).to receive(:get).once.and_return('{"tenant_discovery_' \
+        'endpoint": "https://login.windows.net/atenant.onmicrosoft.com/.well-' \
+        'known/openid-configuration"}')
+      expect(auth.validate).to be_truthy
+    end
+
+    it 'should not make a network connection after it validates once' do
+      auth = ADAL::Authority.new(
+        'someothersite.net', 'atenant.onmicrosoft.com', true)
+      expect(Net::HTTP).to receive(:get).once.and_return(
+        '{"tenant_discovery_endpoint": "endpoint"}')
+      expect(auth.validate).to be_truthy
+      expect(auth.validate).to be_truthy
+      expect(auth.validate).to be_truthy
+      expect(auth.validate).to be_truthy
+    end
   end
 end

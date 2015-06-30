@@ -1,10 +1,23 @@
+require_relative './logging'
+
 require 'json'
 require 'jwt'
+require 'openssl'
 
 module ADAL
   # The return type of all of the instance methods that return tokens.
   class TokenResponse
+    extend Logging
+
+    ##
+    # Constructs a TokenResponse from a raw hash. It will return either a
+    # SuccessResponse or an ErrorResponse depending on the fields of the hash.
+    #
+    # @param Hash raw_response
+    #   The body of the HTTP response expressed as a raw hash.
+    # @return TokenResponse
     def self.from_raw(raw_response)
+      logger.verbose('Attempting to create a TokenResponse from raw response.')
       if raw_response['error']
         ErrorResponse.new(JSON.parse(raw_response))
       else
@@ -14,6 +27,10 @@ module ADAL
 
     public
 
+    ##
+    # Shorthand for checking if a token response is successful or failed.
+    #
+    # @return Boolean
     def error?
       self.respond_to? :error
     end
@@ -21,6 +38,8 @@ module ADAL
 
   # A token response that contains an access token.
   class SuccessResponse < TokenResponse
+    include Logging
+
     attr_reader :access_token
     attr_reader :expires_in
     attr_reader :expires_on
@@ -35,11 +54,17 @@ module ADAL
       @refresh_token = opt['refresh_token']
       @scope = opt['scope']
       @token_type = opt['token_type']
+      logger.info('Parsed a SuccessResponse with access token digest ' \
+                  "#{Digest::SHA256.hexdigest @access_token.to_s} and " \
+                  'refresh token digest ' \
+                  "#{Digest::SHA256.hexdigest @refresh_token.to_s}.")
     end
   end
 
   # A token response that contains an error code.
   class ErrorResponse < TokenResponse
+    include Logging
+
     attr_reader :error
     attr_reader :error_description
     attr_reader :error_codes
@@ -58,6 +83,8 @@ module ADAL
       @correlation_id = opt['correlation_id']
       @submit_url = opt['submit_url']
       @context = opt['context']
+      logger.error("Parsed an ErrorResponse with error: #{@error} and error " \
+                   "description: #{@error_description}.")
     end
   end
 end

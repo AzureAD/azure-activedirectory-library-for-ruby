@@ -6,6 +6,7 @@ module ADAL
     AAD_API_VERSION = 'api-version'
     ASSERTION = 'assertion'
     CLIENT_ASSERTION = 'client_assertion'
+    CLIENT_ASSERTION_TYPE = 'client_assertion_type'
     CLIENT_ID = 'client_id'
     CLIENT_REQUEST_ID = 'client-request-id'
     CLIENT_RETURN_CLIENT_REQUEST_ID = 'client-return-client-request-id'

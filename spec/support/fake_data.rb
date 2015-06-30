@@ -4,6 +4,7 @@
 module FakeData
   AUTH_CODE = 'auth_code_1'
   AUTHORITY = 'login.windows.net'
+  ASSERTION = 'header.payload.crypto'
   CLIENT_ID = 'client_id_1'
   CLIENT_SECRET = 'client_secret_1'
   REDIRECT_URI = 'http://redirect1.com'

@@ -3,6 +3,8 @@ require_relative './noop_cache'
 require_relative './oauth_request'
 require_relative './request_parameters'
 
+require 'openssl'
+
 module ADAL
   # A request for a token that may be fulfilled by a cache or an OAuthRequest
   # to a token endpoint.
@@ -61,8 +63,9 @@ module ADAL
 
     # @return [TokenResponse]
     def get_with_refresh_token(refresh_token, resource = nil)
-      logger.verbose('TokenRequest getting token with refresh token ' \
-                     "#{refresh_token} and resource #{resource}.")
+      logger.verbose('TokenRequest getting token with refresh token digest ' \
+                     "#{Digest::SHA256.hexdigest refresh_token} and resource " \
+                     "#{resource}.")
       get_with_request_params(GRANT_TYPE => GrantTypes::REFRESH_TOKEN,
                               REFRESH_TOKEN => refresh_token,
                               RESOURCE => resource)

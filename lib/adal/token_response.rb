@@ -2,6 +2,7 @@ require_relative './logging'
 
 require 'json'
 require 'jwt'
+require 'openssl'
 
 module ADAL
   # The return type of all of the instance methods that return tokens.

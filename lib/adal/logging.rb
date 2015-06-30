@@ -1,5 +1,7 @@
 require_relative './logger'
 
+require 'securerandom'
+
 module ADAL
   # Mix-in module for the ADAL logger. To obtain a logger in class methods the
   # calling class will need to extend this module. To obtain a logger in
@@ -8,37 +10,16 @@ module ADAL
     DEFAULT_LOG_LEVEL = Logger::ERROR
     DEFAULT_LOG_OUTPUT = STDOUT
 
-    # Since Ruby ADAL is a blocking library, only one request will ever be
-    # running per thread. So the correlation id at any given time is unique
-    # to the thread. By storing it here, we don't need to worry about passing
-    # the correlation around between calling classes that may need it.
-    #
-    # The correlation id can be accessed as ADAL::Logging.correlation_id which
-    # will return the thread specific correlation id. This pattern is used by
-    # several well known Ruby libraries including ActiveRecord, the Model
-    # framework used by Rails.
-    @correlation_id = {}
-
+    @correlation_id = SecureRandom.uuid
     @log_level = DEFAULT_LOG_LEVEL
     @log_output = DEFAULT_LOG_OUTPUT
 
-    # According to style guide, class instance variables are preferable to
+    # According to the style guide, class instance variables are preferable to
     # class variables.
     class << self
+      attr_accessor :correlation_id
       attr_accessor :log_level
       attr_accessor :log_output
-
-      def correlation_id=(val)
-        @correlation_id[Thread.current.object_id] = val
-      end
-
-      def correlation_id
-        @correlation_id[Thread.current.object_id]
-      end
-
-      def remove_correlation_id
-        @correlation_id.delete(Thread.current.object_id)
-      end
     end
 
     ##

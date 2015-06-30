@@ -18,9 +18,6 @@ module ADAL
     include RequestParameters
     include Util
 
-    # The read method is nontrivial so it cannot be defined with a macro.
-    attr_writer :next_correlation_id
-
     def initialize(authority_uri, tenant, options = {})
       fail_if_arguments_nil(authority_uri, tenant)
       validate_authority = options [:validate_authority] || false
@@ -42,9 +39,7 @@ module ADAL
     # @return [TokenResponse]
     def acquire_token_for_client(resource, client_cred)
       fail_if_arguments_nil(resource, client_cred)
-      with_correlation_id do
-        token_request_for(client_cred).get_for_client(resource)
-      end
+      token_request_for(client_cred).get_for_client(resource)
     end
 
     ##
@@ -64,10 +59,8 @@ module ADAL
     def acquire_token_with_authorization_code(
       auth_code, redirect_uri, client_cred, resource = nil)
       fail_if_arguments_nil(auth_code, redirect_uri, client_cred)
-      with_correlation_id do
-        token_request_for(client_cred)
-          .get_with_authorization_code(auth_code, redirect_uri, resource)
-      end
+      token_request_for(client_cred)
+        .get_with_authorization_code(auth_code, redirect_uri, resource)
     end
 
     ##
@@ -84,10 +77,8 @@ module ADAL
     def acquire_token_with_refresh_token(
       refresh_token, client_cred, resource = nil)
       fail_if_arguments_nil(refresh_token, client_cred)
-      with_correlation_id do
-        token_request_for(client_cred)
-          .get_with_refresh_token(refresh_token, resource)
-      end
+      token_request_for(client_cred)
+        .get_with_refresh_token(refresh_token, resource)
     end
 
     ##
@@ -146,34 +137,22 @@ module ADAL
           response_type: CODE))
     end
 
-    # The correlation id that will be used on the next request. It can be set
-    # with the attribute writer, but it is not necessary to use ADAL.
-    def next_correlation_id
-      @next_correlation_id ||= SecureRandom.uuid
+    ##
+    # Sets the correlation id that will be used in all future request headers
+    # and logs.
+    #
+    # @param String value
+    #   The UUID to use as the correlation for all subsequent requests.
+    def correlation_id=(value)
+      Logging.correlation_id = value
     end
 
     private
-
-    # Returns the current next_correlation_id and resets it so that it cannot be
-    # used again. There is no reason for a client to use this.
-    def next_correlation_id!
-      temp = next_correlation_id
-      @next_correlation_id = SecureRandom.uuid
-      temp
-    end
 
     # Helper function for creating token requests based on client credentials
     # and the current authentication context.
     def token_request_for(client_cred)
       TokenRequest.new(@authority, wrap_client_cred(client_cred))
-    end
-
-    # Sets the correlation_id on the logger for the duration of the call.
-    def with_correlation_id
-      Logging.correlation_id = next_correlation_id!
-      result = yield
-      Logging.remove_correlation_id
-      result
     end
 
     def wrap_client_cred(client_cred)

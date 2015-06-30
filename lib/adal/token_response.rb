@@ -16,14 +16,10 @@ module ADAL
     #   The body of the HTTP response expressed as a raw hash.
     # @return TokenResponse
     def self.from_raw(raw_response)
-      logger.verbose('Attempting to create a TokenResponse from raw response ' \
-                     'with SHA256 hash ' \
-                     "#{Digest::SHA256.hexdigest raw_response}.")
+      logger.verbose('Attempting to create a TokenResponse from raw response.')
       if raw_response['error']
-        logger.verbose('HTTP response identified as an ErrorResponse.')
         ErrorResponse.new(JSON.parse(raw_response))
       else
-        logger.verbose('HTTP response identified as a SuccessResponse.')
         SuccessResponse.new(JSON.parse(raw_response))
       end
     end
@@ -41,6 +37,8 @@ module ADAL
 
   # A token response that contains an access token.
   class SuccessResponse < TokenResponse
+    include Logging
+
     attr_reader :access_token
     attr_reader :expires_in
     attr_reader :expires_on
@@ -55,11 +53,17 @@ module ADAL
       @refresh_token = opt['refresh_token']
       @scope = opt['scope']
       @token_type = opt['token_type']
+      logger.info('Parsed a SuccessResponse with access token digest ' \
+                  "#{Digest::SHA256.hexdigest @access_token.to_s} and " \
+                  'refresh token digest ' \
+                  "#{Digest::SHA256.hexdigest @refresh_token.to_s}.")
     end
   end
 
   # A token response that contains an error code.
   class ErrorResponse < TokenResponse
+    include Logging
+
     attr_reader :error
     attr_reader :error_description
     attr_reader :error_codes
@@ -78,6 +82,8 @@ module ADAL
       @correlation_id = opt['correlation_id']
       @submit_url = opt['submit_url']
       @context = opt['context']
+      logger.error("Parsed an ErrorResponse with error: #{@error} and error " \
+                   "description: #{@error_description}.")
     end
   end
 end

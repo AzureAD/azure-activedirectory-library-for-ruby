@@ -1,6 +1,7 @@
 source "https://rubygems.org"
 
 gem 'jwt'
+gem 'openssl'
 gem 'uri_template'
 
 group :test do

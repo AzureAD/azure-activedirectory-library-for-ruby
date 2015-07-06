@@ -14,19 +14,21 @@ describe ADAL::ClientAssertionCertificate do
     it "should fail if the public key isn't large enough" do
       # The key is an integer number of bytes so we have to subtract at least 8.
       too_few_bits = ADAL::ClientAssertionCertificate::MIN_KEY_SIZE_BITS - 8
-      @cert.public_key = OpenSSL::PKey::RSA.new(too_few_bits).public_key
+      key = OpenSSL::PKey::RSA.new(too_few_bits)
+      @cert.public_key = key.public_key
+      pfx = OpenSSL::PKCS12.create('', '', key, @cert)
       expect do
-        ADAL::ClientAssertionCertificate.new(
-          @auth, CLIENT_ID, @cert, OpenSSL::PKey::RSA.new(2048))
+        ADAL::ClientAssertionCertificate.new(@auth, CLIENT_ID, pfx)
       end.to raise_error(ArgumentError)
     end
 
     it 'should succeed if the public key is the minimum size' do
       just_enough_bits = ADAL::ClientAssertionCertificate::MIN_KEY_SIZE_BITS
-      @cert.public_key = OpenSSL::PKey::RSA.new(just_enough_bits).public_key
+      key = OpenSSL::PKey::RSA.new(just_enough_bits)
+      @cert.public_key = key.public_key
+      pfx = OpenSSL::PKCS12.create('', '', key, @cert)
       expect do
-        ADAL::ClientAssertionCertificate.new(
-          @auth, CLIENT_ID, @cert, OpenSSL::PKey::RSA.new(2048))
+        ADAL::ClientAssertionCertificate.new(@auth, CLIENT_ID, pfx)
       end.to_not raise_error
     end
   end
@@ -35,11 +37,12 @@ describe ADAL::ClientAssertionCertificate do
     ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365
 
     before(:each) do
-      private_key = OpenSSL::PKey::RSA.new 2048
+      key = OpenSSL::PKey::RSA.new 2048
       @cert = OpenSSL::X509::Certificate.new
-      @cert.public_key = private_key.public_key
+      @cert.public_key = key.public_key
+      @pfx = OpenSSL::PKCS12.create('', '', key, @cert)
       @assertion_cert = ADAL::ClientAssertionCertificate.new(
-        ADAL::Authority.new(AUTHORITY, TENANT), CLIENT_ID, @cert, private_key)
+        ADAL::Authority.new(AUTHORITY, TENANT), CLIENT_ID, @pfx)
     end
 
     it 'should contain client id, client assertion and client assertion type' do

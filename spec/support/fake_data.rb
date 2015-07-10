@@ -7,8 +7,10 @@ module FakeData
   ASSERTION = 'header.payload.crypto'
   CLIENT_ID = 'client_id_1'
   CLIENT_SECRET = 'client_secret_1'
+  PASSWORD = 'password1'
   REDIRECT_URI = 'http://redirect1.com'
   REFRESH_TOKEN = 'refresh_token_1'
   RESOURCE = 'resource'
   TENANT = 'TENANT1'
+  USERNAME = 'user1@TENANT1'
 end

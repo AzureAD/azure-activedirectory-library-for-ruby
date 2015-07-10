@@ -14,10 +14,14 @@ module ADAL
 
     # All accepted grant types. This module can be mixed-in to other classes
     # that require them.
-    module GrantTypes
+    module GrantType
       AUTHORIZATION_CODE = 'authorization_code'
       CLIENT_CREDENTIALS = 'client_credentials'
+      JWT_BEARER = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+      PASSWORD = 'password'
       REFRESH_TOKEN = 'refresh_token'
+      SAML1 = 'urn:ietf:params:oauth:grant-type:saml1_1-bearer'
+      SAML2 = 'urn:ietf:params:oauth:grant-type:saml2-bearer'
     end
 
     ##
@@ -43,32 +47,48 @@ module ADAL
       @client.request_params
     end
 
+    # @param String resource
     # @return [TokenResponse]
     def get_for_client(resource)
       logger.verbose("TokenRequest getting token for client for #{resource}.")
-      get_with_request_params(GRANT_TYPE => GrantTypes::CLIENT_CREDENTIALS,
+      get_with_request_params(GRANT_TYPE => GrantType::CLIENT_CREDENTIALS,
                               RESOURCE => resource)
     end
 
+    # @param String auth_code
+    # @param String redirect_uri
+    # @param String resource
     # @return [TokenResponse]
     def get_with_authorization_code(auth_code, redirect_uri, resource = nil)
       logger.verbose('TokenRequest getting token with authorization code ' \
                      "#{auth_code}, redirect_uri #{redirect_uri} and " \
                      "resource #{resource}.")
       get_with_request_params(CODE => auth_code,
-                              GRANT_TYPE => GrantTypes::AUTHORIZATION_CODE,
+                              GRANT_TYPE => GrantType::AUTHORIZATION_CODE,
                               REDIRECT_URI => URI.parse(redirect_uri.to_s),
                               RESOURCE => resource)
     end
 
+    # @param String refresh_token
+    # @param String resource
     # @return [TokenResponse]
     def get_with_refresh_token(refresh_token, resource = nil)
       logger.verbose('TokenRequest getting token with refresh token digest ' \
                      "#{Digest::SHA256.hexdigest refresh_token} and resource " \
                      "#{resource}.")
-      get_with_request_params(GRANT_TYPE => GrantTypes::REFRESH_TOKEN,
+      get_with_request_params(GRANT_TYPE => GrantType::REFRESH_TOKEN,
                               REFRESH_TOKEN => refresh_token,
                               RESOURCE => resource)
+    end
+
+    # @param UserCredential user_cred
+    # @param String resource
+    # @return [TokenResponse]
+    def get_with_user_credential(user_cred, resource = nil)
+      logger.verbose('TokenRequest getting token with user credential ' \
+                     "#{user_cred} and resource #{resource}.")
+      get_with_request_params(
+        user_cred.request_params.merge(RESOURCE => resource))
     end
 
     private

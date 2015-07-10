@@ -28,5 +28,13 @@ module ADAL
       @assertion_type = assertion_type
       @username = username
     end
+
+    ##
+    # The relevant OAuth access token request parameters for this object.
+    #
+    # @return Hash
+    def request_params
+      fail NotImplementedError
+    end
   end
 end

@@ -4,7 +4,7 @@ require_relative '../../lib/adal'
 ADAL::Logging.log_level = ADAL::Logger::VERBOSE
 
 AUTHORITY_HOST = ADAL::Authority::WORLD_WIDE_AUTHORITY
-CLIENT_ID = '9ba1a5c7-f17a-4de9-a1f1-6178c8d51223'
+CLIENT_ID = 'your clientid here'
 RESOURCE = 'https://graph.windows.net'
 TENANT = 'your tenant here.onmicrosoft.com'
 

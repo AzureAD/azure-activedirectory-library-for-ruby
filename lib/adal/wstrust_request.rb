@@ -32,7 +32,7 @@ module ADAL
     # @param String username
     # @param String password
     # @return WSTrustResponse
-    def request(username, password)
+    def execute(username, password)
       request = Net::HTTP::Get.new(@endpoint.path)
       add_headers(request)
       request.body = rst(username, password)

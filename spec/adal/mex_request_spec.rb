@@ -12,7 +12,7 @@ describe ADAL::MexRequest do
     end
   end
 
-  describe '#request' do
+  describe '#execute' do
     let(:response_body) { 'response body' }
     let(:uri) { 'https://abc.def/' }
 
@@ -22,7 +22,7 @@ describe ADAL::MexRequest do
         @http_request = req
       end.and_return(double(body: response_body))
       expect(ADAL::MexResponse).to receive(:parse)
-      ADAL::MexRequest.new(uri).request
+      ADAL::MexRequest.new(uri).execute
     end
 
     describe 'http request' do

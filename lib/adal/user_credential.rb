@@ -83,7 +83,7 @@ module ADAL
     # @return Hash
     def federated_request_params
       logger.verbose("Getting OAuth parameters for Federated #{@username}.")
-      wstrust_response = wstrust_request.request(@username, @password)
+      wstrust_response = wstrust_request.execute(@username, @password)
       { assertion: Base64.encode64(wstrust_response.token).strip,
         grant_type: wstrust_response.grant_type,
         scope: 'openid' }
@@ -104,7 +104,7 @@ module ADAL
 
     # @return MexResponse
     def mex_response
-      @mex_response ||= MexRequest.new(federation_metadata_url).request
+      @mex_response ||= MexRequest.new(federation_metadata_url).execute
     end
 
     # @return WSTrustRequest

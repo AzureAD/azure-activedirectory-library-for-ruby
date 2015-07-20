@@ -15,7 +15,7 @@ describe ADAL::WSTrustRequest do
     end
   end
 
-  describe '#request' do
+  describe '#execute' do
     let(:uri) { 'https://microsoft.com/' }
 
     it 'parses the body as an ADAL::WSTrustResponse' do
@@ -23,7 +23,7 @@ describe ADAL::WSTrustRequest do
       expect_any_instance_of(Net::HTTP).to receive(:request).once
         .and_return(double(body: mex_response_body))
       expect(ADAL::WSTrustResponse).to receive(:parse).with(mex_response_body)
-      subject.request('some user', 'some password')
+      subject.execute('some user', 'some password')
     end
   end
 end

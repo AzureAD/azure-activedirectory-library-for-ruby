@@ -99,7 +99,7 @@ module ADAL
     # @return TokenResponse
     def get_with_request_params(request_params)
       all_params = client_params.merge(request_params).select { |_, v| !v.nil? }
-      check_cache || oauth_request(all_params).get
+      check_cache || oauth_request(all_params).execute
     end
 
     ##

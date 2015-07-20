@@ -34,9 +34,9 @@ describe ADAL::UserCredential do
       let(:wstrust_url) { 'https://ghi.jkl/' }
 
       before(:each) do
-        expect_any_instance_of(ADAL::MexRequest).to receive(:request)
+        expect_any_instance_of(ADAL::MexRequest).to receive(:execute)
           .and_return(double(wstrust_url: wstrust_url))
-        expect_any_instance_of(ADAL::WSTrustRequest).to receive(:request)
+        expect_any_instance_of(ADAL::WSTrustRequest).to receive(:execute)
           .and_return(double(token: token, grant_type: grant_type))
       end
 

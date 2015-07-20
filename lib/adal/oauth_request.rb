@@ -27,7 +27,7 @@ module ADAL
     ##
     # Requests and waits for a token from the endpoint.
     # @return TokenResponse
-    def get
+    def execute
       request = Net::HTTP::Post.new(@endpoint_uri.path)
       add_headers(request)
       request.body = URI.encode_www_form(params)

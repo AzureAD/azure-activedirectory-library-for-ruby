@@ -75,6 +75,6 @@ describe ADAL::TokenRequest do
   end
 
   def mock_request(result = nil)
-    instance_double('oauth_request', get: result)
+    instance_double('oauth_request', execute: result)
   end
 end

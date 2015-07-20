@@ -21,7 +21,7 @@ module ADAL
     end
 
     # @return MexResponse
-    def request
+    def execute
       request = Net::HTTP::Get.new(@endpoint.path)
       request.add_field('Content-Type', 'application/soap+xml')
       MexResponse.parse(http(@endpoint).request(request).body)

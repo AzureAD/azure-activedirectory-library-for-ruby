@@ -41,7 +41,7 @@ module ADAL
 
     # @return UserCredential::AccountType
     def account_type
-      common_response['account_type']
+      realm_discovery_response['account_type']
     end
 
     # @return Hash
@@ -64,15 +64,16 @@ module ADAL
 
     private
 
-    # Memoized response from the common endpoint. Since a UserCredential is read
-    # only, this should only ever need to be called once.
+    # Memoized response from the discovery endpoint. Since a UserCredential is
+    # read only, this should only ever need to be called once.
     # @return Hash
-    def common_response
-      @common_response ||= JSON.parse(Net::HTTP.get(common_uri))
+    def realm_discovery_response
+      @realm_discovery_response ||=
+        JSON.parse(Net::HTTP.get(realm_discovery_uri))
     end
 
     # @return URI
-    def common_uri
+    def realm_discovery_uri
       URI::HTTPS.build(
         host: @authority_host,
         path: @discovery_path,
@@ -90,7 +91,7 @@ module ADAL
 
     # @return URI
     def federation_metadata_url
-      URI.parse(common_response['federation_metadata_url'])
+      URI.parse(realm_discovery_response['federation_metadata_url'])
     end
 
     # @return Hash

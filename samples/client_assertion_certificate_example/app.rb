@@ -13,21 +13,13 @@ CLIENT_ID = 'your client id here'
 RESOURCE = 'https://outlook.office365.com'
 TENANT = 'your tenant here.onmicrosoft.com'
 
-# The path to your public certificate.
-CERT_PATH = './path/to/your/public/cert.pem'
+PFX_PATH = './path/to/your/cert.pfx'
+PFX_PASSWORD = 'password'
 
-# The path to you private key file.
-KEY_PATH = './path/to/your/private/key.pem'
-
-# The password to your private key file, or the empty string if there is none.
-KEY_PASSWORD = 'password'
-
-cert = OpenSSL::X509::Certificate.new(File.read(CERT_PATH))
-key = OpenSSL::PKey::RSA.new(File.read(KEY_PATH), 'password')
+pfx = OpenSSL::PKCS12.new(File.read(PFX_PATH), PFX_PASSWORD)
 
 authority = ADAL::Authority.new(AUTHORITY_HOST, TENANT)
-client_cred = ADAL::ClientAssertionCertificate
-              .new(authority, CLIENT_ID, cert, key)
+client_cred = ADAL::ClientAssertionCertificate.new(authority, CLIENT_ID, pfx)
 result = ADAL::AuthenticationContext
          .new(AUTHORITY_HOST, TENANT)
          .acquire_token_for_client(RESOURCE, client_cred)

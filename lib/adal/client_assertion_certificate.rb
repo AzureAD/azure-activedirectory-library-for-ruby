@@ -20,16 +20,17 @@ module ADAL
     #   The authority object that will recognize this certificate.
     # @param [String] client_id
     #   The client id of the calling application.
-    # @param [OpenSSL::X509::Certificate] certificate
-    #   The client's public certificate.
-    # @param [OpenSSL::PKey::RSA] private_key
-    #   The client's private key.
-    def initialize(authority, client_id, certificate, private_key)
-      validate_certificate_and_key(certificate, private_key)
+    # @param [OpenSSL::PKCS12] pkcs12_file
+    #   The PKCS12 file containing the certificate and private key.
+    def initialize(authority, client_id, pkcs12_file)
+      unless pkcs12_file.is_a? OpenSSL::PKCS12
+        fail ArgumentError, 'Only PKCS12 file format is supported.'
+      end
       @authority = authority
-      @certificate = certificate
+      @certificate = pkcs12_file.certificate
       @client_id = client_id.to_s
-      @private_key = private_key
+      @private_key = pkcs12_file.key
+      validate_certificate_and_key(@certificate, @private_key)
     end
 
     # The relevant parameters from this credential for OAuth.

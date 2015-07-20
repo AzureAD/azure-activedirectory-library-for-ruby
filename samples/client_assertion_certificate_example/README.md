@@ -25,13 +25,13 @@ $keyId = [System.Guid]::NewGuid().ToString()
   "value": "[base 64 value]"
 }
 ```
-6. Export the .cer certificate to a public certificate .pem and a private key .pem.
-7. Fill in your tenant, client id of the web application, paths to your .pem files and optionally the password to your private key file in app.rb.
+6. Export the certificate as a PFX (PKCS12). This can be done via the Windows Certificate Manager GUI.
+7. Fill in your tenant, client id of the web application and path and password to your .pfx file in app.rb.
 
 ### Run
 Run the app as ```ruby app.rb```.
 
-##Common problems
+## Common problems
 ### I get an error that looks like: 
 ```
 ...net/http.rb:xxx: in connect SSL_connect returned=1 errno=0 state=SSLv3 read server certificate verify failed (OpenSSL::SSL::SSLError)

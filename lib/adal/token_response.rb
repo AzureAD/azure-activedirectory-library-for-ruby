@@ -16,7 +16,7 @@ module ADAL
     # @param Hash raw_response
     #   The body of the HTTP response expressed as a raw hash.
     # @return TokenResponse
-    def self.from_raw(raw_response)
+    def self.parse(raw_response)
       logger.verbose('Attempting to create a TokenResponse from raw response.')
       if raw_response['error']
         ErrorResponse.new(JSON.parse(raw_response))

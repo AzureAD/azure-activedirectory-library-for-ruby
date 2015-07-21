@@ -82,6 +82,24 @@ module ADAL
     end
 
     ##
+    # Gets an access token using a username and password for either a federated
+    # or a managed user.
+    #
+    # @param String resource
+    #   The resource being requested.
+    # @param String|ClientCredential|ClientAssertion|ClientAssertionCertificate
+    #   The client application can be validated in four different manners,
+    #   depending on the OAuth flow. This object must support request_params or
+    #   be a String containing the client id.
+    # @param UserCredential
+    #   The username and password wrapped in an ADAL::UserCredential.
+    def acquire_token_with_user_credential(resource, client_cred, user_cred)
+      fail_if_arguments_nil(resource, client_cred, user_cred)
+      token_request_for(client_cred)
+        .get_with_user_credential(user_cred, resource)
+    end
+
+    ##
     # Gets an acccess token with a previously acquired user token.
     #
     # @param String resource
@@ -109,7 +127,7 @@ module ADAL
     # @param UserIdentifier user_id
     #   The identifier of the user that the token is being requested for.
     # @return [TokenResponse]
-    def acquire_token_with_username_identifier(resource, client_cred, user_id)
+    def acquire_token_with_user_identifier(resource, client_cred, user_id)
       fail_if_arguments_nil(resource, client_cred, user_id)
       fail NotImplementedError
     end

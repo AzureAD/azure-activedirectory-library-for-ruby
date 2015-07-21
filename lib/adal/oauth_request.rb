@@ -1,5 +1,6 @@
 require_relative './logging'
 require_relative './request_parameters'
+require_relative './util'
 
 require 'net/http'
 require 'uri'
@@ -8,6 +9,7 @@ module ADAL
   # A request that can be made to an authentication or token server.
   class OAuthRequest
     include RequestParameters
+    include Util
 
     DEFAULT_CONTENT_TYPE = 'application/x-www-form-urlencoded'
     DEFAULT_ENCODING = 'utf8'
@@ -25,11 +27,11 @@ module ADAL
     ##
     # Requests and waits for a token from the endpoint.
     # @return TokenResponse
-    def get
+    def execute
       request = Net::HTTP::Post.new(@endpoint_uri.path)
       add_headers(request)
       request.body = URI.encode_www_form(params)
-      TokenResponse.from_raw(http.request(request).body)
+      TokenResponse.parse(http(@endpoint_uri).request(request).body)
     end
 
     private
@@ -47,13 +49,6 @@ module ADAL
     def default_parameters
       { encoding: DEFAULT_ENCODING,
         AAD_API_VERSION => '1.0' }
-    end
-
-    # Constructs an HTTP connection based on the instance with SSL if necessary.
-    def http
-      http_conn = Net::HTTP.new(@endpoint_uri.host, @endpoint_uri.port)
-      http_conn.use_ssl = true if @endpoint_uri.scheme == SSL_SCHEME
-      http_conn
     end
   end
 end

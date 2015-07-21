@@ -5,7 +5,10 @@ require 'simplecov'
 require 'webmock/rspec'
 
 # The coverage tool only considers code after this line.
-SimpleCov.start
+SimpleCov.start do
+  add_filter 'spec' # ignore spec files
+end
+
 require 'adal'
 
 # Don't print any logs from ADAL::Logger.
@@ -22,5 +25,9 @@ RSpec.configure do |config|
     # match will attempt to access the network and raise exceptions.
     stub_request(:post, %r{oauth2/authorize}).to_rack(FakeAuthEndpoint)
     stub_request(:post, %r{oauth2/token}).to_rack(FakeTokenEndpoint)
+  end
+
+  config.expect_with :rspec do |c|
+    c.syntax = :expect
   end
 end

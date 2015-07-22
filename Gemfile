@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 gem 'escape_utils'
 gem 'jwt'
-gem 'openssl'
+gem 'nokogiri'
 gem 'uri_template'
 
 group :test do

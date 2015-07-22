@@ -1,3 +1,20 @@
+#-------------------------------------------------------------------------------
+# # Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
+# ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A
+# PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
+#
+# See the Apache License, Version 2.0 for the specific language
+# governing permissions and limitations under the License.
+#-------------------------------------------------------------------------------
+
 require_relative '../spec_helper'
 
 include FakeData
@@ -55,7 +72,7 @@ describe ADAL::UserCredential do
       describe 'scope' do
         subject { user_cred.request_params[:scope] }
 
-        it { is_expected.to eq 'openid' }
+        it { is_expected.to eq :openid }
       end
     end
   end
@@ -71,7 +88,7 @@ describe ADAL::UserCredential do
     describe '#request_params' do
       it 'should contain username, password and grant type' do
         expect(user_cred.request_params.keys).to contain_exactly(
-          :username, :password, :grant_type)
+          :username, :password, :grant_type, :scope)
       end
 
       describe 'grant_type' do

@@ -15,5 +15,9 @@
 # governing permissions and limitations under the License.
 #-------------------------------------------------------------------------------
 
-# Extract all Ruby files in $DIR/lib/adal/ regardless of where the gem is built.
-Dir[File.expand_path('../adal/*.rb', __FILE__)].each { |f| require_relative f }
+require_relative '../spec_helper'
+
+describe ADAL::MemoryCache do
+  describe '#add' do
+  end
+end

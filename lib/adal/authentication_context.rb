@@ -1,3 +1,20 @@
+#-------------------------------------------------------------------------------
+# # Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
+# ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A
+# PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
+#
+# See the Apache License, Version 2.0 for the specific language
+# governing permissions and limitations under the License.
+#-------------------------------------------------------------------------------
+
 require_relative './authority'
 require_relative './core_ext'
 require_relative './memory_cache'
@@ -170,7 +187,7 @@ module ADAL
     # Helper function for creating token requests based on client credentials
     # and the current authentication context.
     def token_request_for(client_cred)
-      TokenRequest.new(@authority, wrap_client_cred(client_cred))
+      TokenRequest.new(@authority, wrap_client_cred(client_cred), @token_cache)
     end
 
     def wrap_client_cred(client_cred)

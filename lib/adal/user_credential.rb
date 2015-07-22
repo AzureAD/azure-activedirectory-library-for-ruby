@@ -1,3 +1,20 @@
+#-------------------------------------------------------------------------------
+# # Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
+# ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A
+# PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
+#
+# See the Apache License, Version 2.0 for the specific language
+# governing permissions and limitations under the License.
+#-------------------------------------------------------------------------------
+
 require_relative './authority'
 require_relative './logger'
 require_relative './mex_request'
@@ -31,6 +48,13 @@ module ADAL
     attr_reader :username
     attr_reader :password
 
+    ##
+    # Constructs a new UserCredential.
+    #
+    # @param String username
+    # @param String password
+    # @optional String authority_host
+    #   The host name of the authority to verify the user against.
     def initialize(
       username, password, authority_host = Authority::WORLD_WIDE_AUTHORITY)
       @username = username
@@ -39,11 +63,17 @@ module ADAL
       @discovery_path = "/common/userrealm/#{URI.escape @username}"
     end
 
+    ##
+    # Determines the account type based on a Home Realm Discovery request.
+    #
     # @return UserCredential::AccountType
     def account_type
       realm_discovery_response['account_type']
     end
 
+    ##
+    # The OAuth parameters that respresent this UserCredential.
+    #
     # @return Hash
     def request_params
       case account_type
@@ -86,7 +116,7 @@ module ADAL
       wstrust_response = wstrust_request.execute(@username, @password)
       { assertion: Base64.encode64(wstrust_response.token).strip,
         grant_type: wstrust_response.grant_type,
-        scope: 'openid' }
+        scope: :openid }
     end
 
     # @return URI
@@ -99,7 +129,8 @@ module ADAL
       logger.verbose("Getting OAuth parameters for Managed #{@username}.")
       { username: @username,
         password: @password,
-        grant_type: TokenRequest::GrantType::PASSWORD }
+        grant_type: TokenRequest::GrantType::PASSWORD,
+        scope: :openid }
     end
 
     # @return MexResponse

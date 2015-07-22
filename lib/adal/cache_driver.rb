@@ -141,7 +141,7 @@ module ADAL
     def update_refresh_tokens(mrrt)
       fail ArgumentError, 'Token must contain an MRRT.' unless mrrt.mrrt?
       @token_cache.find.each do |entry|
-        entry.refresh_token = mrrt.refresh_token if mrrt.can_refresh? entry
+        entry.refresh_token = mrrt.refresh_token if mrrt.can_refresh?(entry)
       end
     end
 

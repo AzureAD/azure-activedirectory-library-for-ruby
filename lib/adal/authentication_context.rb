@@ -170,7 +170,7 @@ module ADAL
     # Helper function for creating token requests based on client credentials
     # and the current authentication context.
     def token_request_for(client_cred)
-      TokenRequest.new(@authority, wrap_client_cred(client_cred))
+      TokenRequest.new(@authority, wrap_client_cred(client_cred), @token_cache)
     end
 
     def wrap_client_cred(client_cred)

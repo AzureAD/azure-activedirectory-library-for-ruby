@@ -14,5 +14,14 @@ module ADAL
       http.use_ssl = uri.scheme == 'https'
       http
     end
+
+    ##
+    # Converts every key and value of a hash to string.
+    #
+    # @param Hash
+    # @return Hash
+    def string_hash(hash)
+      hash.map { |k, v| [k.to_s, v.to_s] }.to_h
+    end
   end
 end

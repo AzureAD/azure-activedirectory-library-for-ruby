@@ -17,7 +17,6 @@ class FakeTokenEndpoint < Sinatra::Base
   end
 
   DEFAULT_EXPIRATION = 3600
-  DEFAULT_TOKEN = 'token'
   DEFAULT_TOKEN_TYPE = 'Bearer'
 
   post '/:tenant/oauth2/token' do
@@ -55,7 +54,7 @@ class FakeTokenEndpoint < Sinatra::Base
   end
 
   def successful_oauth_response(opts = {})
-    res = { access_token: opts[:access_token] || DEFAULT_TOKEN,
+    res = { access_token: opts[:access_token] || RETURNED_TOKEN,
             token_type: opts[:token_type] || DEFAULT_TOKEN_TYPE,
             expires_in: opts[:expires_in] || DEFAULT_EXPIRATION }
     res[:refresh_token] = opts[:refresh_token] if opts.key? :refresh_token

@@ -3,6 +3,7 @@ require_relative './logging'
 require 'json'
 require 'jwt'
 require 'openssl'
+require 'securerandom'
 
 module ADAL
   # The return type of all of the instance methods that return tokens.
@@ -36,28 +37,55 @@ module ADAL
     end
   end
 
-  # A token response that contains an access token.
+  # A token response that contains an access token. All fields are read only
+  # and may be nil. Some fields are only populated in certain flows.
   class SuccessResponse < TokenResponse
     include Logging
 
-    attr_reader :access_token
-    attr_reader :expires_in
-    attr_reader :expires_on
-    attr_reader :refresh_token
-    attr_reader :scope
-    attr_reader :token_type
+    # These fields may or may not be included in the response from the token
+    # endpoint.
+    OAUTH_FIELDS = [:access_token, :expires_in, :expires_on, :id_token,
+                    :not_before, :refresh_token, :resource, :scope, :token_type]
+    # These fields may or may not be included as a JWT in id_token if it
+    # returned from the token endpoint.
+    ID_TOKEN_FIELDS = [:aud, :iss, :iat, :nbf, :exp, :ver, :tid, :oid, :upn,
+                       :sub, :given_name, :family_name, :name, :amr,
+                       :unique_name, :nonce]
 
-    def initialize(opt)
-      @access_token = opt['access_token']
-      @expires_in = opt['expires_in'].to_i
-      @expires_on = @expires_in + Time.now.to_i
-      @refresh_token = opt['refresh_token']
-      @scope = opt['scope']
-      @token_type = opt['token_type']
+    (OAUTH_FIELDS + ID_TOKEN_FIELDS).each { |field| attr_reader field }
+
+    ##
+    # Constructs a SuccessResponse from a collection of fields returned from a
+    # token endpoint.
+    #
+    # @param Hash
+    def initialize(fields = {})
+      fields.each { |k, v| instance_variable_set("@#{k}", v) }
+      parse_id_token
+      @expires_on = @expires_in.to_i + Time.now.to_i
       logger.info('Parsed a SuccessResponse with access token digest ' \
                   "#{Digest::SHA256.hexdigest @access_token.to_s} and " \
                   'refresh token digest ' \
                   "#{Digest::SHA256.hexdigest @refresh_token.to_s}.")
+    end
+
+    ##
+    # Parses the id token into fields, if present.
+    #
+    # @optional String alt_id_token
+    #   Adds an id token to the token response if one is not present
+    def parse_id_token(alt_id_token = nil)
+      @id_token ||= alt_id_token if alt_id_token
+      return unless id_token
+      logger.verbose('An ID token was returned with the token response, ' \
+                     'attempting to decode.')
+      JWT.decode(id_token.to_s, nil, false).first.each do |k, v|
+        instance_variable_set("@#{k}", v)
+      end
+    end
+
+    def user_id
+      @user_id ||= (upn || unique_name || sub || SecureRandom.uuid)
     end
   end
 
@@ -65,24 +93,16 @@ module ADAL
   class ErrorResponse < TokenResponse
     include Logging
 
-    attr_reader :error
-    attr_reader :error_description
-    attr_reader :error_codes
-    attr_reader :timestamp
-    attr_reader :trace_id
-    attr_reader :correlation_id
-    attr_reader :submit_url
-    attr_reader :context
+    OAUTH_FIELDS = [:error, :error_description, :error_codes, :timestamp,
+                    :trace_id, :correlation_id, :submit_url, :context]
+    OAUTH_FIELDS.each { |field| attr_reader field }
 
-    def initialize(opt)
-      @error = opt['error']
-      @error_description = opt['error_description']
-      @error_codes = opt['error_codes']
-      @timestamp = opt['timestamp']
-      @trace_id = opt['trace_id']
-      @correlation_id = opt['correlation_id']
-      @submit_url = opt['submit_url']
-      @context = opt['context']
+    # Constructs a Error from a collection of fields returned from a
+    # token endpoint.
+    #
+    # @param Hash
+    def initialize(fields = {})
+      fields.each { |k, v| instance_variable_set("@#{k}", v) }
       logger.error("Parsed an ErrorResponse with error: #{@error} and error " \
                    "description: #{@error_description}.")
     end

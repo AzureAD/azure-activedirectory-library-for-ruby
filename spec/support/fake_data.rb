@@ -10,6 +10,7 @@ module FakeData
   PASSWORD = 'password1'
   REDIRECT_URI = 'http://redirect1.com'
   REFRESH_TOKEN = 'refresh_token_1'
+  RETURNED_TOKEN = 'a new token'
   RESOURCE = 'resource'
   TENANT = 'TENANT1'
   USERNAME = 'user1@TENANT1'

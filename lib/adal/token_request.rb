@@ -1,3 +1,4 @@
+require_relative './cache_driver'
 require_relative './logging'
 require_relative './noop_cache'
 require_relative './oauth_request'
@@ -37,69 +38,134 @@ module ADAL
     #   tokens will be used by default.
     def initialize(authority, client, token_cache = NoopCache.new)
       @authority = authority
+      @cache_driver = CacheDriver.new(authority, client, token_cache)
       @client = client
       @token_cache = token_cache
     end
 
     public
 
-    def client_params
-      @client.request_params
-    end
-
+    ##
+    # Gets a token based solely on the clients credentials that were used to
+    # initialize the token request.
+    #
     # @param String resource
-    # @return [TokenResponse]
+    #   The resource for which the requested access token will provide access.
+    # @return TokenResponse
     def get_for_client(resource)
       logger.verbose("TokenRequest getting token for client for #{resource}.")
-      get_with_request_params(GRANT_TYPE => GrantType::CLIENT_CREDENTIALS,
-                              RESOURCE => resource)
+      request(GRANT_TYPE => GrantType::CLIENT_CREDENTIALS,
+              RESOURCE => resource)
     end
 
+    ##
+    # Gets a token based on a previously acquired authentication code.
+    #
     # @param String auth_code
+    #   An authentication code that was previously acquired from an
+    #   authentication endpoint.
     # @param String redirect_uri
-    # @param String resource
-    # @return [TokenResponse]
+    #   The redirect uri that was passed to the authentication endpoint when the
+    #   auth code was acquired.
+    # @optional String resource
+    #   The resource for which the requested access token will provide access.
+    # @return TokenResponse
     def get_with_authorization_code(auth_code, redirect_uri, resource = nil)
       logger.verbose('TokenRequest getting token with authorization code ' \
                      "#{auth_code}, redirect_uri #{redirect_uri} and " \
                      "resource #{resource}.")
-      get_with_request_params(CODE => auth_code,
-                              GRANT_TYPE => GrantType::AUTHORIZATION_CODE,
-                              REDIRECT_URI => URI.parse(redirect_uri.to_s),
-                              RESOURCE => resource)
+      request(CODE => auth_code,
+              GRANT_TYPE => GrantType::AUTHORIZATION_CODE,
+              REDIRECT_URI => URI.parse(redirect_uri.to_s),
+              RESOURCE => resource)
     end
 
+    ##
+    # Gets a token based on a previously acquired refresh token.
+    #
     # @param String refresh_token
-    # @param String resource
-    # @return [TokenResponse]
+    #   The refresh token that was previously acquired from a token response.
+    # @optional String resource
+    #   The resource for which the requested access token will provide access.
+    # @return TokenResponse
     def get_with_refresh_token(refresh_token, resource = nil)
       logger.verbose('TokenRequest getting token with refresh token digest ' \
                      "#{Digest::SHA256.hexdigest refresh_token} and resource " \
                      "#{resource}.")
-      get_with_request_params(GRANT_TYPE => GrantType::REFRESH_TOKEN,
-                              REFRESH_TOKEN => refresh_token,
-                              RESOURCE => resource)
+      request_no_cache(GRANT_TYPE => GrantType::REFRESH_TOKEN,
+                       REFRESH_TOKEN => refresh_token,
+                       RESOURCE => resource)
     end
 
+    ##
+    # Gets a token based on possessing the users credentials.
+    #
     # @param UserCredential user_cred
-    # @param String resource
-    # @return [TokenResponse]
+    #   Something that can be used to verify the user. Typically a username
+    #   and password.
+    # @optional String resource
+    #   The resource for which the requested access token will provide access.
+    # @return TokenResponse
     def get_with_user_credential(user_cred, resource = nil)
       logger.verbose('TokenRequest getting token with user credential ' \
                      "#{user_cred} and resource #{resource}.")
-      get_with_request_params(
-        user_cred.request_params.merge(RESOURCE => resource))
+      request(user_cred.request_params.merge(RESOURCE => resource))
     end
 
     private
 
     ##
-    # Applies the request, first by checking the cache and then with OAuth.
+    # The OAuth parameters that are specific to the client for which tokens will
+    # be requested.
     #
+    # @return Hash
+    def client_params
+      @client.request_params
+    end
+
+    ##
+    # Attempts to fulfill a token request, first via the token cache and then
+    # through OAuth.
+    #
+    # @param Hash params
+    #   Any additional request parameters that should be used.
     # @return TokenResponse
-    def get_with_request_params(request_params)
-      all_params = client_params.merge(request_params).select { |_, v| !v.nil? }
-      check_cache || oauth_request(all_params).execute
+    def request(params)
+      cached_token = check_cache(request_params(params))
+      return cached_token if cached_token
+      cache_response(request_no_cache(request_params(params)))
+    end
+
+    ##
+    # Executes an OAuth request based on the params and returns it.
+    #
+    # @param Hash params
+    #   Any additional request parameters that should be used.
+    # @return TokenResponse
+    def request_no_cache(params)
+      oauth_request(request_params(params)).execute
+    end
+
+    ##
+    # Adds client params to additional params. If there is a conflict, the value
+    # from additional_params is used. It can be called multiple times, because
+    # request_params(request_params(x)) == request_params(x).
+    #
+    # @param Hash
+    # @return Hash
+    def request_params(additional_params)
+      client_params.merge(additional_params).select { |_, v| !v.nil? }
+    end
+
+    ##
+    # Helper method to chain OAuthRequest and cache operation.
+    #
+    # @param TokenResponse
+    #   The token response to cache.
+    # @return TokenResponse
+    def cache_response(token_response)
+      @cache_driver.add(token_response)
+      token_response
     end
 
     ##
@@ -108,17 +174,21 @@ module ADAL
     # @return TokenResponse
     #   If the cache contains a valid response it wil be returned as a
     #   SuccessResponse. Otherwise returns nil.
-    def check_cache
+    def check_cache(params)
       logger.verbose("TokenRequest checking cache #{@token_cache} for token.")
-      @token_cache.find(self)
+      result = @cache_driver.find(params)
+      logger.info("#{result ? 'Found' : 'Did not find'} token in cache.")
+      result
     end
 
     ##
     # Constructs an OAuthRequest from the TokenRequest instance.
     #
+    # @param Hash params
+    #   The OAuth parameters specific to the TokenRequest instance.
     # @return OAuthRequest
     def oauth_request(params)
-      logger.verbose('TokenRequest did not find the token in the cache.')
+      logger.verbose('Resorting to OAuth to fulfill token request.')
       OAuthRequest.new(@authority.token_endpoint, params)
     end
   end

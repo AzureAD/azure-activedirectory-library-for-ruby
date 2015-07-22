@@ -1,4 +1,6 @@
-require_relative './assertion.rb'
+require_relative './assertion'
+require_relative './request_parameters'
+require_relative './util'
 
 module ADAL
   # A client credential that consists of the client id and a JWT bearer

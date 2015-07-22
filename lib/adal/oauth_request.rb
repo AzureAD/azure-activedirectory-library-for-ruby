@@ -30,7 +30,7 @@ module ADAL
     def execute
       request = Net::HTTP::Post.new(@endpoint_uri.path)
       add_headers(request)
-      request.body = URI.encode_www_form(params)
+      request.body = URI.encode_www_form(string_hash(params))
       TokenResponse.parse(http(@endpoint_uri).request(request).body)
     end
 
@@ -42,8 +42,8 @@ module ADAL
     # @param Net::HTTPGenericRequest
     def add_headers(request)
       return if Logging.correlation_id.nil?
-      request.add_field(CLIENT_REQUEST_ID, Logging.correlation_id)
-      request.add_field(CLIENT_RETURN_CLIENT_REQUEST_ID, true)
+      request.add_field(CLIENT_REQUEST_ID.to_s, Logging.correlation_id)
+      request.add_field(CLIENT_RETURN_CLIENT_REQUEST_ID.to_s, true)
     end
 
     def default_parameters

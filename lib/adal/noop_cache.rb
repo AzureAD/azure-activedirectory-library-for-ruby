@@ -8,6 +8,9 @@ module ADAL
     alias_method :add_many, :noop
     alias_method :remove, :noop
     alias_method :remove_many, :noop
-    alias_method :find, :noop
+
+    def find(*)
+      []
+    end
   end
 end

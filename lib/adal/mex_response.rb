@@ -53,8 +53,10 @@ module ADAL
       end
     end
 
+    # :nocov:
     def to_s
       "MexResponse[wstrust_url = #{@wstrust_url}]"
     end
+    # :nocov:
   end
 end

@@ -55,7 +55,7 @@ describe ADAL::UserCredential do
       describe 'scope' do
         subject { user_cred.request_params[:scope] }
 
-        it { is_expected.to eq 'openid' }
+        it { is_expected.to eq :openid }
       end
     end
   end
@@ -71,7 +71,7 @@ describe ADAL::UserCredential do
     describe '#request_params' do
       it 'should contain username, password and grant type' do
         expect(user_cred.request_params.keys).to contain_exactly(
-          :username, :password, :grant_type)
+          :username, :password, :grant_type, :scope)
       end
 
       describe 'grant_type' do

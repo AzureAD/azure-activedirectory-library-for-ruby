@@ -25,6 +25,15 @@ describe ADAL::WSTrustResponse do
       end
     end
 
+    context 'with an unrecognized token type' do
+      let(:file_name) { 'unrecognized_token_type.xml' }
+
+      it 'throws the appropriate error' do
+        expect { ADAL::WSTrustResponse.parse(response) }
+          .to raise_error(ADAL::WSTrustResponse::UnrecognizedTokenTypeError)
+      end
+    end
+
     context 'with an error response' do
       let(:file_name) { 'error.xml' }
 

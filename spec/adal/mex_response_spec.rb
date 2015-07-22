@@ -8,7 +8,9 @@ describe ADAL::MexResponse do
 
     context 'with a successful response' do
       let(:file_name) { 'microsoft.xml' }
-      let(:wstrust_url) { 'https://corp.sts.microsoft.com/adfs/services/trust/13/usernamemixed' }
+      let(:wstrust_url) do
+        'https://corp.sts.microsoft.com/adfs/services/trust/13/usernamemixed'
+      end
 
       it 'should not raise an error' do
         expect { ADAL::MexResponse.parse(response) }.to_not raise_error

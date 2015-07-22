@@ -48,18 +48,18 @@ describe ADAL::ClientAssertionCertificate do
     it 'should contain client id, client assertion and client assertion type' do
       params = @assertion_cert.request_params
       expect(params.keys).to contain_exactly(
-        'client_id', 'client_assertion', 'client_assertion_type')
+        :client_id, :client_assertion, :client_assertion_type)
     end
 
     it 'should have client assertion type be JWT_BEARER' do
       expect(
-        @assertion_cert.request_params['client_assertion_type']
+        @assertion_cert.request_params[:client_assertion_type]
       ).to eq(ADAL::Assertion::JWT_BEARER)
     end
 
     it 'should have an assertion that is a decodable JWT' do
       expect do
-        JWT.decode(@assertion_cert.request_params['client_assertion'],
+        JWT.decode(@assertion_cert.request_params[:client_assertion],
                    @cert.public_key,
                    options: { verify_not_before: false })
       end.to_not raise_error

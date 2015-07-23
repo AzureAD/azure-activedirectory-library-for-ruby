@@ -71,7 +71,7 @@ describe ADAL::ClientAssertionCertificate do
     it 'should have client assertion type be JWT_BEARER' do
       expect(
         @assertion_cert.request_params[:client_assertion_type]
-      ).to eq(ADAL::Assertion::JWT_BEARER)
+      ).to eq('urn:ietf:params:oauth:grant-type:jwt-bearer')
     end
 
     it 'should have an assertion that is a decodable JWT' do

@@ -35,10 +35,25 @@ module ADAL
     include RequestParameters
     include Util
 
-    def initialize(authority_uri, tenant, options = {})
-      fail_if_arguments_nil(authority_uri, tenant)
-      validate_authority = options [:validate_authority] || false
-      @authority = Authority.new(authority_uri, tenant, validate_authority)
+    ##
+    # Creates a new AuthenticationContext.
+    #
+    # @param String authority_host
+    #   The host name of the authority to verify against, e.g.
+    #   'login.windows.net'.
+    # @param String tenant
+    #   The tenant to authenticate to, e.g. 'contoso.onmicrosoft.com'.
+    # @optional Boolean validate_authority
+    #   Whether the authority should be checked for validity before making
+    #   token requests. Defaults to false.
+    # @optional TokenCache token_cache
+    #   An cache that ADAL will use to store access tokens and refresh tokens
+    #   in. By default an empty in-memory cache is created. An existing cache
+    #   can be used to data persistence.
+    def initialize(authority_host, tenant, options = {})
+      fail_if_arguments_nil(authority_host, tenant)
+      validate_authority = options[:validate_authority] || false
+      @authority = Authority.new(authority_host, tenant, validate_authority)
       @token_cache = options[:token_cache] || MemoryCache.new
     end
 
@@ -53,7 +68,7 @@ module ADAL
     # @param ClientCredential|ClientAssertion|ClientAssertionCertificate
     #   An object that validates the client application by adding
     #   #request_params to the OAuth request.
-    # @return [TokenResponse]
+    # @return TokenResponse
     def acquire_token_for_client(resource, client_cred)
       fail_if_arguments_nil(resource, client_cred)
       token_request_for(client_cred).get_for_client(resource)
@@ -72,7 +87,7 @@ module ADAL
     #   #request_params to the OAuth request.
     # @optional String resource
     #   The resource being requested.
-    # @return [TokenResponse]
+    # @return TokenResponse
     def acquire_token_with_authorization_code(
       auth_code, redirect_uri, client_cred, resource = nil)
       fail_if_arguments_nil(auth_code, redirect_uri, client_cred)
@@ -90,7 +105,7 @@ module ADAL
     #   depending on the OAuth flow. This object must support #request_params.
     # @optional String resource
     #   The resource being requested.
-    # @return [TokenResponse]
+    # @return TokenResponse
     def acquire_token_with_refresh_token(
       refresh_token, client_cred, resource = nil)
       fail_if_arguments_nil(refresh_token, client_cred)
@@ -110,6 +125,7 @@ module ADAL
     #   be a String containing the client id.
     # @param UserCredential
     #   The username and password wrapped in an ADAL::UserCredential.
+    # @return TokenResponse
     def acquire_token_with_user_credential(resource, client_cred, user_cred)
       fail_if_arguments_nil(resource, client_cred, user_cred)
       token_request_for(client_cred)
@@ -126,10 +142,11 @@ module ADAL
     #   #request_params to the OAuth request.
     # @param UserAssertion
     #   The previously acquire user token.
-    # @return [TokenResponse]
+    # @return TokenResponse
     def acquire_token_on_behalf(resource, client_cred, user_assertion)
       fail_if_arguments_nil(resource, client_cred, user_assertion)
-      fail NotImplementedError
+      token_request_for(client_cred)
+        .get_with_user_credential(user_assertion, resource)
     end
 
     ##
@@ -143,7 +160,7 @@ module ADAL
     #   #request_params to the OAuth request.
     # @param UserIdentifier user_id
     #   The identifier of the user that the token is being requested for.
-    # @return [TokenResponse]
+    # @return TokenResponse
     def acquire_token_with_user_identifier(resource, client_cred, user_id)
       fail_if_arguments_nil(resource, client_cred, user_id)
       fail NotImplementedError

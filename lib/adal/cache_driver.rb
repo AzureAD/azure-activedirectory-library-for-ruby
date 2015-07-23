@@ -128,7 +128,8 @@ module ADAL
     def resource_specific(responses, resource)
       logger.verbose("Looking through #{responses.size} matching cache " \
                      "entries for resource #{resource}.")
-      responses.select { |response| response.resource == resource }.map(&:token_response).first
+      responses.select { |response| response.resource == resource }
+        .map(&:token_response).first
     end
 
     ##

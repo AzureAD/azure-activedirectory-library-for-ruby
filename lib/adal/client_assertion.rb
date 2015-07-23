@@ -15,15 +15,15 @@
 # governing permissions and limitations under the License.
 #-------------------------------------------------------------------------------
 
-require_relative './assertion'
 require_relative './request_parameters'
+require_relative './token_request'
 require_relative './util'
 
 module ADAL
   # A client credential that consists of the client id and a JWT bearer
   # assertion. The type is 'urn:ietf:params:oauth:token-type:jwt'.
   class ClientAssertion
-    include Assertion
+    include TokenRequest::GrantType
     include RequestParameters
     include Util
 
@@ -45,7 +45,10 @@ module ADAL
       @client_id = client_id
     end
 
+    ##
     # The relavent parameters from this credential for OAuth.
+    #
+    # @return Hash
     def request_params
       { CLIENT_ID => @client_id,
         CLIENT_ASSERTION_TYPE => @assertion_type,

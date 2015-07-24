@@ -15,7 +15,7 @@
 # governing permissions and limitations under the License.
 #-------------------------------------------------------------------------------
 
-require_relative '../../lib/adal'
+require 'adal'
 
 # This will make ADAL log the various steps of obtaining an access token.
 ADAL::Logging.log_level = ADAL::Logger::VERBOSE

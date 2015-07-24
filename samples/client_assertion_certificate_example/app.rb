@@ -18,8 +18,7 @@
 # See the accompanying README.md for instructions on how to set-up an
 # application to run this sample.
 
-require_relative '../../lib/adal'
-
+require 'adal'
 require 'openssl'
 
 # This will make ADAL log the various steps of JWT creation from certificates.

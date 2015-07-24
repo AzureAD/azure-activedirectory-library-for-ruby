@@ -12,5 +12,5 @@ Currently, you can build the gem from scratch.
 
 ```
 gem build adal.gemspec
-gem install adal-0.0.0.gem
+gem install adal
 ```

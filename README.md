@@ -14,3 +14,6 @@ Currently, you can build the gem from scratch.
 gem build adal.gemspec
 gem install adal
 ```
+
+## Tests
+To run the tests, you first need to install the dependencies with `bundle install`. The tests are set up as a rake task, so they can be run with `bundle exec rake spec`.

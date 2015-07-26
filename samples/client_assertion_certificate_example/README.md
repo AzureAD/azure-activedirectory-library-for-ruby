@@ -1,4 +1,4 @@
-##Authenticating with a Certificate and Private Key
+## Authenticating with a Certificate and Private Key
 
 ### Set-Up
 1. Register a web application in the Azure portal. Note it's client id.

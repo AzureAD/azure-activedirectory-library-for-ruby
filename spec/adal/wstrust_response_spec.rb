@@ -60,6 +60,15 @@ describe ADAL::WSTrustResponse do
         end.to raise_error(ADAL::WSTrustResponse::WSTrustResponseError)
       end
     end
+
+    context 'with invalid namespaces' do
+      let(:file_name) { 'invalid_namespaces.xml' }
+
+      it 'throws the appropriate error' do
+        expect { ADAL::WSTrustResponse.parse(response) }
+          .to raise_error(ADAL::WSTrustResponse::WSTrustResponseError)
+      end
+    end
   end
 
   describe '#grant_type' do

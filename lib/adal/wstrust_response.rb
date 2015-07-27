@@ -16,12 +16,15 @@
 #-------------------------------------------------------------------------------
 
 require_relative './token_request'
+require_relative './xml_namespaces'
 
 require 'nokogiri'
 
 module ADAL
   # Relevant fields from a WS-Trust response.
   class WSTrustResponse
+    include XmlNamespaces
+
     # All recognized SAML token types.
     module TokenType
       V1 = 'urn:oasis:names:tc:SAML:1.0:assertion'
@@ -50,11 +53,11 @@ module ADAL
     def self.parse(raw_xml)
       parse_error(raw_xml)
       xml = Nokogiri::XML(raw_xml.to_s)
-      namespaces = xml.namespaces.merge(trust: 'http://docs.oasis-open.org/ws-sx/ws-trust/200512')
-      token_response = xml.xpath(TOKEN_RESPONSE_XPATH, namespaces).first
+      token_response = xml.xpath(TOKEN_RESPONSE_XPATH, NAMESPACES).first
+      fail WSTrustResponseError, 'No valid token response.' unless token_response
       WSTrustResponse.new(
-        format_xml(token_response.xpath(TOKEN_XPATH, namespaces).first),
-        token_response.xpath(TOKEN_TYPE_XPATH, namespaces).first.to_s)
+        format_xml(token_response.xpath(TOKEN_XPATH, NAMESPACES).first),
+        token_response.xpath(TOKEN_TYPE_XPATH, NAMESPACES).first.to_s)
     end
 
     ##
@@ -64,8 +67,8 @@ module ADAL
     # @param String|Nokogiri::XML raw_xml
     def self.parse_error(raw_xml)
       xml = Nokogiri::XML(raw_xml.to_s)
-      fault = xml.xpath(FAULT_XPATH).first
-      error = xml.xpath(ERROR_XPATH).first
+      fault = xml.xpath(FAULT_XPATH, NAMESPACES).first
+      error = xml.xpath(ERROR_XPATH, NAMESPACES).first
       error = format_xml(error).split(':')[1] || error if error
       if fault || error
         fail WSTrustResponseError, "Fault: #{fault}. Error: #{error}."

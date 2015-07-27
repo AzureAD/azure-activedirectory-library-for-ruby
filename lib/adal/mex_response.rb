@@ -15,6 +15,7 @@
 # governing permissions and limitations under the License.
 #-------------------------------------------------------------------------------
 
+require_relative './logging'
 require_relative './xml_namespaces'
 
 require 'nokogiri'
@@ -24,6 +25,10 @@ module ADAL
   # Relevant fields from a Mex response.
   class MexResponse
     include XmlNamespaces
+
+    class << self
+      include Logging
+    end
 
     class MexError < StandardError; end
 
@@ -43,20 +48,47 @@ module ADAL
     # @return MexResponse
     def self.parse(response)
       xml = Nokogiri::XML(response)
-      policy_ids = xml.xpath(POLICY_ID_XPATH, NAMESPACES).map { |attr| "\##{attr.value}" }
-      matching_bindings = xml.xpath(BINDING_XPATH, NAMESPACES).map do |node|
-        if policy_ids.include? node.xpath('./wsp:PolicyReference/@URI', NAMESPACES).to_s
-          node.xpath('./@name').to_s
-        end
-      end.compact
-      endpoints = xml.xpath(PORT_XPATH, NAMESPACES).map do |node|
-        binding = node.xpath('./@binding', NAMESPACES).to_s.split(':').last
-        node.xpath(ADDRESS_XPATH, NAMESPACES).to_s if matching_bindings.include? binding
-      end.compact
-      if endpoints.empty?
-        fail MexError, 'No valid WS-Trust endpoints found in Mex Response.'
+      policy_ids = parse_policy_ids(xml)
+      bindings = parse_bindings(xml, policy_ids)
+      endpoints = parse_endpoints(xml, bindings)
+      if endpoints.size > 1
+        logger.warn('Multiple WS-Trust endpoints were found in the mex ' \
+                    'response. Only one was used.')
       end
-      MexResponse.new(endpoints.sample)
+      MexResponse.new(endpoints.first)
+    end
+
+    # @param Nokogiri::XML::Document xml
+    # @param Array[String] policy_ids
+    # @return Array[String]
+    private_class_method def self.parse_bindings(xml, policy_ids)
+      matching_bindings = xml.xpath(BINDING_XPATH, NAMESPACES).map do |node|
+        reference_uri = node.xpath('./wsp:PolicyReference/@URI', NAMESPACES)
+        node.xpath('./@name').to_s if policy_ids.include? reference_uri.to_s
+      end.compact
+      fail MexError, 'No matching bindings found.' if matching_bindings.empty?
+      matching_bindings
+    end
+
+    # @param Nokogiri::XML::Document xml
+    # @param Array[String] bindings
+    # @return Array[String]
+    private_class_method def self.parse_endpoints(xml, bindings)
+      endpoints = xml.xpath(PORT_XPATH, NAMESPACES).map do |node|
+        binding = node.attr('binding').split(':').last
+        node.xpath(ADDRESS_XPATH, NAMESPACES).to_s if bindings.include? binding
+      end.compact
+      fail MexError, 'No valid WS-Trust endpoints found.' if endpoints.empty?
+      endpoints
+    end
+
+    # @param Nokogiri::XML::Document xml
+    # @return Array[String]
+    private_class_method def self.parse_policy_ids(xml)
+      policy_ids =
+        xml.xpath(POLICY_ID_XPATH, NAMESPACES).map { |attr| "\##{attr.value}" }
+      fail MexError, 'No username token policy nodes.' if policy_ids.empty?
+      policy_ids
     end
 
     attr_reader :wstrust_url
@@ -67,9 +99,8 @@ module ADAL
     # @param String|URI wstrust_url
     def initialize(wstrust_url)
       @wstrust_url = URI.parse(wstrust_url.to_s)
-      unless @wstrust_url.instance_of? URI::HTTPS
-        fail ArgumentError, 'Mex is only done over HTTPS.'
-      end
+      return if @wstrust_url.instance_of? URI::HTTPS
+      fail ArgumentError, 'Mex is only done over HTTPS.'
     end
 
     # :nocov:

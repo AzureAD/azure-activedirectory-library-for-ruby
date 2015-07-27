@@ -65,5 +65,46 @@ describe ADAL::MexResponse do
           .to raise_error(ADAL::MexResponse::MexError)
       end
     end
+
+    context 'with no policy nodes' do
+      let(:file_name) { 'no_username_token_policies.xml' }
+
+      it 'should throw an error' do
+        expect { ADAL::MexResponse.parse(response) }
+          .to raise_error(ADAL::MexResponse::MexError)
+      end
+    end
+
+    context 'with no wstrust endpoints' do
+      let(:file_name) { 'no_wstrust_endpoints.xml' }
+
+      it 'should throw an error' do
+        expect { ADAL::MexResponse.parse(response) }
+          .to raise_error(ADAL::MexResponse::MexError)
+      end
+    end
+
+    context 'with no matching bindings' do
+      let(:file_name) { 'no_matching_bindings.xml' }
+
+      it 'should throw an error' do
+        expect { ADAL::MexResponse.parse(response) }
+          .to raise_error(ADAL::MexResponse::MexError)
+      end
+    end
+
+    context 'with multiple valid endpoints' do
+      let(:file_name) { 'multiple_endpoints.xml' }
+      let(:first_wstrust_url) do
+        'https://this.is.first.com/adfs/services/trust/13/usernamemixed'
+      end
+      subject { ADAL::MexResponse.parse(response) }
+
+      it { expect { subject }.to_not raise_error }
+
+      it 'should use the first endpoint' do
+        expect(subject.wstrust_url.to_s).to eq(first_wstrust_url)
+      end
+    end
   end
 end

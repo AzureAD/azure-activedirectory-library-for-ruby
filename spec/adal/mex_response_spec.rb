@@ -43,8 +43,8 @@ describe ADAL::MexResponse do
       let(:file_name) { 'malformed.xml' }
 
       it 'should throw an error' do
-        expect { ADAL::MexResponse.parse(response) }.to raise_error(
-          ADAL::MexResponse::MexError)
+        expect { ADAL::MexResponse.parse(response) }
+          .to raise_error(ADAL::MexResponse::MexError)
       end
     end
 
@@ -52,8 +52,17 @@ describe ADAL::MexResponse do
       let(:file_name) { 'insecureaddress.xml' }
 
       it 'should throw an error' do
-        expect { ADAL::MexResponse.parse(response) }.to raise_error(
-          ArgumentError)
+        expect { ADAL::MexResponse.parse(response) }
+          .to raise_error(ArgumentError)
+      end
+    end
+
+    context 'with invalid namespaces' do
+      let(:file_name) { 'invalid_namespaces.xml' }
+
+      it 'should throw an error' do
+        expect { ADAL::MexResponse.parse(response) }
+          .to raise_error(ADAL::MexResponse::MexError)
       end
     end
   end

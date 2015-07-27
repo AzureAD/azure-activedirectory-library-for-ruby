@@ -15,41 +15,43 @@
 # governing permissions and limitations under the License.
 #-------------------------------------------------------------------------------
 
+require_relative './xml_namespaces'
+
 require 'nokogiri'
 require 'uri'
 
 module ADAL
   # Relevant fields from a Mex response.
   class MexResponse
+    include XmlNamespaces
+
     class MexError < StandardError; end
 
-    POLICY_XPATH = '//definitions/Policy[./ExactlyOne/All/' \
-                   'SignedEncryptedSupportingTokens/Policy/UsernameToken/' \
-                   'Policy/WssUsernameToken10]'
-    POLICY_ID_XPATH = '//definitions/Policy[./ExactlyOne/All/' \
-                      'SignedEncryptedSupportingTokens/Policy/UsernameToken/' \
-                      'Policy/WssUsernameToken10]/@Id'
-    BINDING_XPATH = '//definitions/binding[./PolicyReference]'
-    PORT_XPATH = '//definitions/service/port'
-    ADDRESS_XPATH = './address/@location'
+    POLICY_XPATH = '//wsdl:definitions/wsp:Policy[./wsp:ExactlyOne/wsp:All/' \
+                   'sp:SignedEncryptedSupportingTokens/wsp:Policy/' \
+                   'sp:UsernameToken/wsp:Policy/sp:WssUsernameToken10]'
+    POLICY_ID_XPATH = POLICY_XPATH + '/@wsu:Id'
+    BINDING_XPATH = '//wsdl:definitions/wsdl:binding[./wsp:PolicyReference]'
+    PORT_XPATH = '//wsdl:definitions/wsdl:service/wsdl:port'
+    ADDRESS_XPATH = './soap12:address/@location'
 
     ##
     # Parses the XML string response from the Metadata Exchange endpoint into
     # a MexResponse object.
     #
     # @param String response
-    #
+    # @return MexResponse
     def self.parse(response)
-      xml = Nokogiri::XML(response).remove_namespaces!
-      policy_ids = xml.xpath(POLICY_ID_XPATH).map { |attr| "\##{attr.value}" }
-      matching_bindings = xml.xpath(BINDING_XPATH).map do |node|
-        if policy_ids.include? node.xpath('./PolicyReference/@URI').to_s
+      xml = Nokogiri::XML(response)
+      policy_ids = xml.xpath(POLICY_ID_XPATH, NAMESPACES).map { |attr| "\##{attr.value}" }
+      matching_bindings = xml.xpath(BINDING_XPATH, NAMESPACES).map do |node|
+        if policy_ids.include? node.xpath('./wsp:PolicyReference/@URI', NAMESPACES).to_s
           node.xpath('./@name').to_s
         end
       end.compact
-      endpoints = xml.xpath(PORT_XPATH).map do |node|
-        binding = node.xpath('./@binding').to_s.split(':').last
-        node.xpath(ADDRESS_XPATH).to_s if matching_bindings.include? binding
+      endpoints = xml.xpath(PORT_XPATH, NAMESPACES).map do |node|
+        binding = node.xpath('./@binding', NAMESPACES).to_s.split(':').last
+        node.xpath(ADDRESS_XPATH, NAMESPACES).to_s if matching_bindings.include? binding
       end.compact
       if endpoints.empty?
         fail MexError, 'No valid WS-Trust endpoints found in Mex Response.'

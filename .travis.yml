@@ -4,4 +4,4 @@ rvm:
   - 2.1
   - 2.2
 
-script: rspec
+script: bundle exec rake spec

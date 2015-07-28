@@ -15,35 +15,27 @@
 # governing permissions and limitations under the License.
 #-------------------------------------------------------------------------------
 
-require_relative './assertion.rb'
+require_relative './token_request'
 
 module ADAL
   # An assertion and its representation type, stored as a JWT for
-  # the on-behalf-of flow, as well as the user who the token was requested for.
+  # the on-behalf-of flow.
   class UserAssertion
-    include Assertion
-
     attr_reader :assertion
     attr_reader :assertion_type
-    attr_reader :username
 
     ##
     # Creates a new UserAssertion.
     #
-    # @param [String] assertion
+    # @param String assertion
     #   An OAuth assertion representing the user.
-    # @param [AssertionType] assertion_type
+    # @optional AssertionType assertion_type
     #   The type of the assertion being made. Currently only JWT_BEARER is
     #   supported.
-    # @param [String] username
-    #   The user that the token is requested on behalf of.
-    def initialize(assertion, assertion_type = JWT_BEARER, username = nil)
-      unless ALL_TYPES.include? assertion_type
-        fail ArgumentError, 'Invalid assertion type.'
-      end
+    def initialize(
+      assertion, assertion_type = ADAL::TokenRequest::GrantType::JWT_BEARER)
       @assertion = assertion
       @assertion_type = assertion_type
-      @username = username
     end
 
     ##
@@ -51,7 +43,10 @@ module ADAL
     #
     # @return Hash
     def request_params
-      fail NotImplementedError
+      { grant_type: assertion_type,
+        assertion: assertion,
+        requested_token_use: :on_behalf_of,
+        scope: :openid }
     end
   end
 end

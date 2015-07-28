@@ -31,4 +31,5 @@ module FakeData
   RESOURCE = 'resource'
   TENANT = 'TENANT1'
   USERNAME = 'user1@TENANT1'
+  USER_ASSERTION = 'user_assertion_1'
 end

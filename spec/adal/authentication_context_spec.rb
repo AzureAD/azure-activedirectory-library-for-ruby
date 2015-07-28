@@ -91,4 +91,20 @@ describe ADAL::AuthenticationContext do
       end.to raise_error(ArgumentError)
     end
   end
+
+  describe '#acquire_token_on_behalf' do
+    context 'with valid parameters' do
+      let(:user) { ADAL::UserAssertion.new(USER_ASSERTION) }
+      subject { auth_ctx.acquire_token_on_behalf(RESOURCE, client_cred, user) }
+
+      it { is_expected.to be_a(ADAL::SuccessResponse) }
+    end
+
+    context 'with invalid parameters' do
+      it 'should fail' do
+        expect { auth_ctx.acquire_token_on_behalf(nil, nil) }
+          .to raise_error(ArgumentError)
+      end
+    end
+  end
 end

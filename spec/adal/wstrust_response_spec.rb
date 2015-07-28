@@ -57,7 +57,7 @@ describe ADAL::WSTrustResponse do
       it 'throws the appropriate error' do
         expect do
           ADAL::WSTrustResponse.parse(response)
-        end.to raise_error(ADAL::WSTrustResponse::WSTrustError)
+        end.to raise_error(ADAL::WSTrustResponse::WSTrustError, /MSIS3127/)
       end
     end
 
@@ -66,7 +66,8 @@ describe ADAL::WSTrustResponse do
 
       it 'throws the appropriate error' do
         expect { ADAL::WSTrustResponse.parse(response) }
-          .to raise_error(ADAL::WSTrustResponse::WSTrustError)
+          .to raise_error(
+            ADAL::WSTrustResponse::WSTrustError, /Unable to parse token/)
       end
     end
 
@@ -75,7 +76,9 @@ describe ADAL::WSTrustResponse do
 
       it 'throws the appropriate error' do
         expect { ADAL::WSTrustResponse.parse(response) }
-          .to raise_error(ADAL::WSTrustResponse::WSTrustError)
+          .to raise_error(
+            ADAL::WSTrustResponse::WSTrustError,
+            /too many RequestedSecurityTokens/)
       end
     end
 

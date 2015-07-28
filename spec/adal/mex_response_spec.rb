@@ -44,7 +44,8 @@ describe ADAL::MexResponse do
 
       it 'should throw an error' do
         expect { ADAL::MexResponse.parse(response) }
-          .to raise_error(ADAL::MexResponse::MexError)
+          .to raise_error(
+            ADAL::MexResponse::MexError, /No username token policy nodes/)
       end
     end
 
@@ -62,7 +63,8 @@ describe ADAL::MexResponse do
 
       it 'should throw an error' do
         expect { ADAL::MexResponse.parse(response) }
-          .to raise_error(ADAL::MexResponse::MexError)
+          .to raise_error(
+            ADAL::MexResponse::MexError, /No username token policy nodes/)
       end
     end
 
@@ -71,7 +73,8 @@ describe ADAL::MexResponse do
 
       it 'should throw an error' do
         expect { ADAL::MexResponse.parse(response) }
-          .to raise_error(ADAL::MexResponse::MexError)
+          .to raise_error(
+            ADAL::MexResponse::MexError, /No username token policy nodes/)
       end
     end
 
@@ -80,7 +83,8 @@ describe ADAL::MexResponse do
 
       it 'should throw an error' do
         expect { ADAL::MexResponse.parse(response) }
-          .to raise_error(ADAL::MexResponse::MexError)
+          .to raise_error(
+            ADAL::MexResponse::MexError, /No valid WS-Trust endpoints/)
       end
     end
 
@@ -89,7 +93,7 @@ describe ADAL::MexResponse do
 
       it 'should throw an error' do
         expect { ADAL::MexResponse.parse(response) }
-          .to raise_error(ADAL::MexResponse::MexError)
+          .to raise_error(ADAL::MexResponse::MexError, /No matching bindings/)
       end
     end
 

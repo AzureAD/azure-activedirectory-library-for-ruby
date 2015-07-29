@@ -30,16 +30,15 @@ CLIENT_SECRET = 'your client secret here'
 @@ctx = ADAL::AuthenticationContext.new(AUTHORITY_HOST, TENANT)
 @@client_cred = ADAL::ClientCredential.new(CLIENT_ID, CLIENT_SECRET)
 
-set :port, 44321
+set :port, 44_321
 
 before do
   # If the client does not send an access token, then he is unauthorized.
   halt 401 unless env['HTTP_BEARER']
 
   token = exchange_tokens(env['HTTP_BEARER'])
-  #env[:access_token] = token.access_token if token.respond_to? :access_token
   env[:access_token] = token.access_token
-  
+
   # If we cannot exchange the clients access token for a new one, then he is
   # unauthorized.
   halt 401 unless env[:access_token]
@@ -53,7 +52,6 @@ get '/api/graph' do
   http.use_ssl = true
   http.get(graph_uri, headers).body
 end
-
 
 ##
 # Exchanges an access token for this web api for an access token for another

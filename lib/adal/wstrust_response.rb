@@ -78,9 +78,7 @@ module ADAL
       fault = xml.xpath(FAULT_XPATH, NAMESPACES).first
       error = xml.xpath(ERROR_XPATH, NAMESPACES).first
       error = format_xml(error).split(':')[1] || error if error
-      if fault || error
-        fail WSTrustError, "Fault: #{fault}. Error: #{error}."
-      end
+      fail WSTrustError, "Fault: #{fault}. Error: #{error}." if fault || error
     end
 
     # @param Nokogiri::XML::Document xml

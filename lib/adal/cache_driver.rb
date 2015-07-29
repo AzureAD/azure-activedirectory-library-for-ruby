@@ -17,6 +17,7 @@
 
 require_relative './core_ext'
 require_relative './logging'
+require_relative './request_parameters'
 require_relative './util'
 
 using ADAL::CoreExt

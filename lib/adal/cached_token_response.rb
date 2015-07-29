@@ -94,8 +94,9 @@ module ADAL
     #   to using the same resource as the original token.
     # @return TokenResponse
     def refresh(new_resource = resource)
-      token_response = TokenRequest.new(authority, client)
-        .get_with_refresh_token(refresh_token, new_resource)
+      token_response = TokenRequest
+                       .new(authority, client)
+                       .get_with_refresh_token(refresh_token, new_resource)
       if token_response.instance_of? SuccessResponse
         token_response.parse_id_token(id_token)
       end
@@ -116,7 +117,7 @@ module ADAL
     #
     # @return Boolean
     def mrrt?
-      token_response.refresh_token && !!token_response.resource
+      token_response.refresh_token && token_response.resource
     end
 
     ## Since the token cache may be implemented by the user of this library,

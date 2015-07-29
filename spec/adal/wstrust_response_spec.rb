@@ -57,7 +57,7 @@ describe ADAL::WSTrustResponse do
       it 'throws the appropriate error' do
         expect do
           ADAL::WSTrustResponse.parse(response)
-        end.to raise_error(ADAL::WSTrustResponse::WSTrustResponseError)
+        end.to raise_error(ADAL::WSTrustResponse::WSTrustError, /MSIS3127/)
       end
     end
 
@@ -66,7 +66,31 @@ describe ADAL::WSTrustResponse do
 
       it 'throws the appropriate error' do
         expect { ADAL::WSTrustResponse.parse(response) }
-          .to raise_error(ADAL::WSTrustResponse::WSTrustResponseError)
+          .to raise_error(
+            ADAL::WSTrustResponse::WSTrustError, /Unable to parse token/)
+      end
+    end
+
+    context 'with an invalid abundance of security tokens' do
+      let(:file_name) { 'too_many_security_tokens.xml' }
+
+      it 'throws the appropriate error' do
+        expect { ADAL::WSTrustResponse.parse(response) }
+          .to raise_error(
+            ADAL::WSTrustResponse::WSTrustError,
+            /too many RequestedSecurityTokens/)
+      end
+    end
+
+    context 'with no security tokens on the first token response node' do
+      let(:file_name) { 'missing_security_tokens.xml' }
+      let(:expected_token) { '<foo:Assertion xmlns:foo="bar"/>' }
+      subject { ADAL::WSTrustResponse.parse(response) }
+
+      it { expect { subject }.to_not raise_error }
+
+      it 'should use the backup' do
+        expect(subject.token.to_s).to eq(expected_token)
       end
     end
   end

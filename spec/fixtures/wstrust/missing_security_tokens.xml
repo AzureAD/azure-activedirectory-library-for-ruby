@@ -1,0 +1,90 @@
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+  xmlns:a="http://www.w3.org/2005/08/addressing"
+  xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+  <s:Header>
+    <a:Action s:mustUnderstand="1">http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTRC/IssueFinal</a:Action>
+    <o:Security s:mustUnderstand="1"
+      xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+      <u:Timestamp u:Id="_0">
+        <u:Created>2014-10-11T01:57:52.927Z</u:Created>
+        <u:Expires>2014-10-11T02:02:52.927Z</u:Expires>
+      </u:Timestamp>
+    </o:Security>
+  </s:Header>
+  <s:Body>
+    <trust:RequestSecurityTokenResponseCollection
+      xmlns:trust="http://docs.oasis-open.org/ws-sx/ws-trust/200512">
+      <trust:RequestSecurityTokenResponse>
+        <trust:Lifetime>
+          <wsu:Created
+            xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">2014-10-11T01:57:52.802Z</wsu:Created>
+          <wsu:Expires
+            xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">2014-10-11T02:57:52.802Z</wsu:Expires>
+        </trust:Lifetime>
+        <wsp:AppliesTo xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+          <wsa:EndpointReference xmlns:wsa="http://www.w3.org/2005/08/addressing">
+            <wsa:Address>urn:federation:MicrosoftOnline</wsa:Address>
+          </wsa:EndpointReference>
+        </wsp:AppliesTo>
+        <trust:RequestedAttachedReference>
+          <o:SecurityTokenReference
+            k:TokenType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1"
+            xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+            xmlns:k="http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd">
+            <o:KeyIdentifier
+              ValueType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.0#SAMLAssertionID">_3ad77714-87a7-4ec5-b3e8-dfd2ef68a49e</o:KeyIdentifier>
+          </o:SecurityTokenReference>
+        </trust:RequestedAttachedReference>
+        <trust:RequestedUnattachedReference>
+          <o:SecurityTokenReference
+            k:TokenType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1"
+            xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+            xmlns:k="http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd">
+            <o:KeyIdentifier
+              ValueType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.0#SAMLAssertionID">_3ad77714-87a7-4ec5-b3e8-dfd2ef68a49e</o:KeyIdentifier>
+          </o:SecurityTokenReference>
+        </trust:RequestedUnattachedReference>
+        <trust:TokenType>urn:oasis:names:tc:SAML:1.0:assertion</trust:TokenType>
+        <trust:RequestType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue</trust:RequestType>
+        <trust:KeyType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer</trust:KeyType>
+      </trust:RequestSecurityTokenResponse>
+      <trust:RequestSecurityTokenResponse>
+        <trust:Lifetime>
+          <wsu:Created
+            xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">2014-10-11T01:57:52.802Z</wsu:Created>
+          <wsu:Expires
+            xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">2014-10-11T02:57:52.802Z</wsu:Expires>
+        </trust:Lifetime>
+        <wsp:AppliesTo xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+          <wsa:EndpointReference xmlns:wsa="http://www.w3.org/2005/08/addressing">
+            <wsa:Address>urn:federation:MicrosoftOnline</wsa:Address>
+          </wsa:EndpointReference>
+        </wsp:AppliesTo>
+        <trust:RequestedSecurityToken>
+          <foo:Assertion xmlns:foo="bar"></foo:Assertion>
+        </trust:RequestedSecurityToken>
+        <trust:RequestedAttachedReference>
+          <o:SecurityTokenReference
+            k:TokenType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1"
+            xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+            xmlns:k="http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd">
+            <o:KeyIdentifier
+              ValueType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.0#SAMLAssertionID">_3ad77714-87a7-4ec5-b3e8-dfd2ef68a49e</o:KeyIdentifier>
+          </o:SecurityTokenReference>
+        </trust:RequestedAttachedReference>
+        <trust:RequestedUnattachedReference>
+          <o:SecurityTokenReference
+            k:TokenType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1"
+            xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+            xmlns:k="http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd">
+            <o:KeyIdentifier
+              ValueType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.0#SAMLAssertionID">_3ad77714-87a7-4ec5-b3e8-dfd2ef68a49e</o:KeyIdentifier>
+          </o:SecurityTokenReference>
+        </trust:RequestedUnattachedReference>
+        <trust:TokenType>urn:oasis:names:tc:SAML:1.0:assertion</trust:TokenType>
+        <trust:RequestType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue</trust:RequestType>
+        <trust:KeyType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer</trust:KeyType>
+      </trust:RequestSecurityTokenResponse>
+    </trust:RequestSecurityTokenResponseCollection>
+  </s:Body>
+</s:Envelope>

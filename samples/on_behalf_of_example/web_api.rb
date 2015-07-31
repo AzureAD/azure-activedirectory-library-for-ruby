@@ -62,6 +62,6 @@ end
 # @return String
 #   An access token for the designated resource.
 def exchange_tokens(access_token)
-  @@ctx.acquire_token_on_behalf(
+  @@ctx.acquire_token_for_user(
     RESOURCE, @@client_cred, ADAL::UserAssertion.new(access_token))
 end

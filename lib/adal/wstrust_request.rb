@@ -15,8 +15,10 @@
 # governing permissions and limitations under the License.
 #-------------------------------------------------------------------------------
 
+require_relative './logging'
 require_relative './util'
 require_relative './wstrust_response'
+require_relative './xml_namespaces'
 
 require 'erb'
 require 'openssl'
@@ -27,19 +29,31 @@ module ADAL
   # A request to a WS-Trust endpoint of an ADFS server. Used to obtain a SAML
   # token that can be exchanged for an access token at a token endpoint.
   class WSTrustRequest
+    include Logging
     include Util
+    include XmlNamespaces
 
     DEFAULT_APPLIES_TO = 'urn:federation:MicrosoftOnline'
-    RST_TEMPLATE_PATH = File.expand_path('../templates/rst.xml.erb', __FILE__)
-    RST_TEMPLATE_RENDERER = ERB.new(File.read(RST_TEMPLATE_PATH))
+
+    ACTION_TO_RST_TEMPLATE = {
+      WSTRUST_13 =>
+        File.expand_path('../templates/rst.13.xml.erb', __FILE__),
+      WSTRUST_2005 =>
+        File.expand_path('../templates/rst.2005.xml.erb', __FILE__)
+    }
 
     ##
     # Constructs a new WSTrustRequest.
     #
     # @param String|URI endpoint
-    def initialize(endpoint, applies_to = DEFAULT_APPLIES_TO)
+    # @param String action
+    # @param String applies_to
+    def initialize(
+      endpoint, action = WSTRUST_13, applies_to = DEFAULT_APPLIES_TO)
       @applies_to = applies_to
       @endpoint = URI.parse(endpoint.to_s)
+      @action = action
+      @render = ERB.new(File.read(ACTION_TO_RST_TEMPLATE[action]))
     end
 
     ##
@@ -50,24 +64,34 @@ module ADAL
     # @param String password
     # @return WSTrustResponse
     def execute(username, password)
+      logger.verbose("Making a WSTrust request with action #{@action}.")
       request = Net::HTTP::Get.new(@endpoint.path)
       add_headers(request)
       request.body = rst(username, password)
-      WSTrustResponse.parse(http(@endpoint).request(request).body)
+      response = http(@endpoint).request(request)
+      if response.code == '200'
+        WSTrustResponse.parse(response.body)
+      else
+        fail WSTrustResponse::WSTrustError, "Failed request: code #{response.code}."
+      end
     end
 
     private
 
+    # @param Net::HTTP::Get request
     def add_headers(request)
       request.add_field('Content-Type', 'application/soap+xml; charset=utf-8')
-      request.add_field('SOAPAction', 'http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue')
+      request.add_field('SOAPAction', @action)
     end
 
+    # @param String username
+    # @param String password
+    # @param String message_id
     # @return String
     def rst(username, password, message_id = SecureRandom.uuid)
       created = Time.now
       expires = created + 10 * 60   # 10 minute expiration
-      RST_TEMPLATE_RENDERER.result(binding)
+      @render.result(binding)
     end
   end
 end

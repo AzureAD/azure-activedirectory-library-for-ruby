@@ -43,12 +43,15 @@ module ADAL
     class WSTrustError < StandardError; end
     class UnrecognizedTokenTypeError < WSTrustError; end
 
+    ACTION_XPATH = '//s:Envelope/s:Header/a:Action/text()'
     ERROR_XPATH = '//s:Envelope/s:Body/s:Fault/s:Code/s:Subcode/s:Value/text()'
     FAULT_XPATH = '//s:Envelope/s:Body/s:Fault/s:Reason'
-    SECURITY_TOKEN_XPATH = './wst:RequestedSecurityToken'
-    TOKEN_RESPONSE_XPATH = '//s:Envelope/s:Body/trust:RequestSecurityTokenRes' \
-                           'ponseCollection/trust:RequestSecurityTokenResponse'
-    TOKEN_TYPE_XPATH = './trust:TokenType/text()'
+    SECURITY_TOKEN_XPATH = './trust:RequestedSecurityToken'
+    TOKEN_RESPONSE_XPATH =
+      '//s:Envelope/s:Body/trust:RequestSecurityTokenResponse|//s:Envelope/s:' \
+      'Body/trust:RequestSecurityTokenResponseCollection/trust:RequestSecurit' \
+      'yTokenResponse'
+    TOKEN_TYPE_XPATH = "./*[local-name() = 'TokenType']/text()"
     TOKEN_XPATH = "./*[local-name() = 'Assertion']"
 
     ##
@@ -61,12 +64,22 @@ module ADAL
       fail_if_arguments_nil(raw_xml)
       xml = Nokogiri::XML(raw_xml.to_s)
       parse_error(xml)
-      token, token_type = parse_token(xml)
+      namespace = ACTION_TO_NAMESPACE[parse_action(xml)]
+      token, token_type = parse_token(xml, namespace)
       if token && token_type
         WSTrustResponse.new(format_xml(token), format_xml(token_type))
       else
         fail WSTrustError, 'Unable to parse token from response.'
       end
+    end
+
+    ##
+    # Determines whether the response uses WS-Trust 2005 or WS-Trust 1.3.
+    #
+    # @param Nokogiri::XML::Document xml
+    # @return String
+    def self.parse_action(xml)
+      xml.xpath(ACTION_XPATH, NAMESPACES).to_s
     end
 
     ##
@@ -89,18 +102,17 @@ module ADAL
 
     # @param Nokogiri::XML::Document
     # @return [Nokogiri::XML::Element, Nokogiri::XML::Text]
-    private_class_method def self.parse_token(xml)
-      xml.xpath(TOKEN_RESPONSE_XPATH, NAMESPACES).select do |node|
-        type = parse_token_type(node)
-        requested_token = node.xpath(SECURITY_TOKEN_XPATH, NAMESPACES)
+    private_class_method def self.parse_token(xml, namespace)
+      xml.xpath(TOKEN_RESPONSE_XPATH, namespace).select do |node|
+        requested_token = node.xpath(SECURITY_TOKEN_XPATH, namespace)
         case requested_token.size
         when 0
-          logger.warn("No security token in token response of type #{type}.")
+          logger.warn('No security token in token response.')
           next
         when 1
-          token = requested_token.xpath(TOKEN_XPATH).first
+          token = requested_token.xpath(TOKEN_XPATH, namespace).first
           next if token.nil?
-          return token, type
+          return token, parse_token_type(node)
         else
           fail WSTrustError, 'Found too many RequestedSecurityTokens.'
         end

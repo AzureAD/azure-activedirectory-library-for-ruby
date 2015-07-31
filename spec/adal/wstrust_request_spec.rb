@@ -38,7 +38,7 @@ describe ADAL::WSTrustRequest do
     it 'parses the body as an ADAL::WSTrustResponse' do
       mex_response_body = 'mex body'
       expect_any_instance_of(Net::HTTP).to receive(:request).once
-        .and_return(double(body: mex_response_body))
+        .and_return(double(body: mex_response_body, code: '200'))
       expect(ADAL::WSTrustResponse).to receive(:parse).with(mex_response_body)
       subject.execute('some user', 'some password')
     end

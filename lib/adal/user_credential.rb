@@ -140,7 +140,8 @@ module ADAL
 
     # @return WSTrustRequest
     def wstrust_request
-      @wstrust_request ||= WSTrustRequest.new(mex_response.wstrust_url)
+      @wstrust_request ||=
+        WSTrustRequest.new(mex_response.wstrust_url, mex_response.action)
     end
   end
 end

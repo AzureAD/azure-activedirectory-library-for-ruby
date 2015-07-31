@@ -43,5 +43,5 @@ headers = { 'Bearer' => token_response.access_token }
 http = Net::HTTP.new(web_api_uri.hostname, web_api_uri.port)
 web_api_response = http.get(web_api_uri, headers)
 
-puts "Here is your directory user graph:"
+puts 'Here is your directory user graph:'
 puts JSON.pretty_generate(JSON.parse(web_api_response.body))

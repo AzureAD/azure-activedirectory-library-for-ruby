@@ -16,6 +16,7 @@
 #-------------------------------------------------------------------------------
 
 module ADAL
+  # The current ADAL version.
   class Version
     MAJOR = 0 unless defined? MAJOR
     MINOR = 1 unless defined? MINOR

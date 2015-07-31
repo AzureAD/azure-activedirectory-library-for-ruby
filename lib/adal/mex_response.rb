@@ -91,10 +91,10 @@ module ADAL
         fail MexError, 'No valid WS-Trust endpoints found.'
       when 1
       else
-        logger.warn('Multiple WS-Trust endpoints were found in the mex ' \
+        logger.info('Multiple WS-Trust endpoints were found in the mex ' \
                     'response. Only one was used.')
       end
-      endpoints.first
+      prefer_13(endpoints).first
     end
 
     # @param Nokogiri::XML::Document xml
@@ -104,6 +104,13 @@ module ADAL
                    .map { |attr| "\##{attr.value}" }
       fail MexError, 'No username token policy nodes.' if policy_ids.empty?
       policy_ids
+    end
+
+    # @param Array[String, String] endpoints
+    # @return Array[String, String] endpoints
+    private_class_method def self.prefer_13(endpoints)
+      only13 = endpoints.select { |_, b| BINDING_TO_ACTION[b] == WSTRUST_13 }
+      only13.empty? ? endpoints : only13
     end
 
     attr_reader :action

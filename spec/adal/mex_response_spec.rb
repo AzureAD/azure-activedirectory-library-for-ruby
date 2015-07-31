@@ -25,17 +25,17 @@ describe ADAL::MexResponse do
 
     context 'with both 1.3 and 2005 endpoints' do
       let(:file_name) { 'microsoft.xml' }
-      let(:first_wstrust_url) do
-        'https://corp.sts.microsoft.com/adfs/services/trust/2005/usernamemixed'
+      let(:wstrust_url_13) do
+        'https://corp.sts.microsoft.com/adfs/services/trust/13/usernamemixed'
       end
 
       it 'should not raise an error' do
         expect { ADAL::MexResponse.parse(response) }.to_not raise_error
       end
 
-      it 'should parse the WS-Trust url' do
+      it 'should prefer the 1.3 endpoint' do
         expect(ADAL::MexResponse.parse(response).wstrust_url.to_s)
-          .to eq(first_wstrust_url)
+          .to eq(wstrust_url_13)
       end
     end
 

@@ -22,11 +22,6 @@ module ADAL
   class MemoryCache
     include Logging
 
-    # Reload the cache from serialized JSON.
-    def self.from_json(_)
-      fail NotImplementedError
-    end
-
     def initialize
       @entries = []
     end
@@ -57,11 +52,6 @@ module ADAL
     def find(&query)
       query ||= proc { true }
       @entries.select(&query)
-    end
-
-    # Serializes the contents of the cache to JSON.
-    def to_json(*)
-      fail NotImplementedError
     end
 
     ##

@@ -51,6 +51,24 @@ describe ADAL::WSTrustResponse do
       end
     end
 
+    context 'with a WS-Trust 1.3 response' do
+      let(:file_name) { 'wstrust.13.xml' }
+
+      it 'extracts the token' do
+        wstrust_response = ADAL::WSTrustResponse.parse(response)
+        expect(wstrust_response.token.strip).to_not be nil
+      end
+    end
+
+    context 'with a WS-Trust 2005 response' do
+      let(:file_name) { 'wstrust.2005.xml' }
+
+      it 'extracts the token' do
+        wstrust_response = ADAL::WSTrustResponse.parse(response)
+        expect(wstrust_response.token.strip).to_not be nil
+      end
+    end
+
     context 'with an error response' do
       let(:file_name) { 'error.xml' }
 

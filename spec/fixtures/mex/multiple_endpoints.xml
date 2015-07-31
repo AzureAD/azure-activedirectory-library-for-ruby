@@ -849,6 +849,12 @@
                 <wsa10:Address>https://corp.sts.microsoft.com/adfs/services/trust/2005/certificatemixed</wsa10:Address>
             </wsa10:EndpointReference>
         </wsdl:port>
+        <wsdl:port name="UserNameWSTrustBinding_IWSTrust13Async" binding="tns:UserNameWSTrustBinding_IWSTrust13Async">
+            <soap12:address location="https://this.is.first.com/adfs/services/trust/13/usernamemixed"/>
+            <wsa10:EndpointReference>
+                <wsa10:Address>https://corp.sts.microsoft.com/adfs/services/trust/13/usernamemixed</wsa10:Address>
+            </wsa10:EndpointReference>
+        </wsdl:port>
         <wsdl:port name="UserNameWSTrustBinding_IWSTrustFeb2005Async" binding="tns:UserNameWSTrustBinding_IWSTrustFeb2005Async">
             <soap12:address location="https://corp.sts.microsoft.com/adfs/services/trust/2005/usernamemixed"/>
             <wsa10:EndpointReference>
@@ -883,12 +889,6 @@
             <soap12:address location="https://corp.sts.microsoft.com/adfs/services/trust/13/certificatemixed"/>
             <wsa10:EndpointReference>
                 <wsa10:Address>https://corp.sts.microsoft.com/adfs/services/trust/13/certificatemixed</wsa10:Address>
-            </wsa10:EndpointReference>
-        </wsdl:port>
-        <wsdl:port name="UserNameWSTrustBinding_IWSTrust13Async" binding="tns:UserNameWSTrustBinding_IWSTrust13Async">
-            <soap12:address location="https://this.is.first.com/adfs/services/trust/13/usernamemixed"/>
-            <wsa10:EndpointReference>
-                <wsa10:Address>https://corp.sts.microsoft.com/adfs/services/trust/13/usernamemixed</wsa10:Address>
             </wsa10:EndpointReference>
         </wsdl:port>
         <wsdl:port name="UserNameWSTrustBinding_IWSTrust13Async" binding="tns:UserNameWSTrustBinding_IWSTrust13Async">

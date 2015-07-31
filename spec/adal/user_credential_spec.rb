@@ -46,13 +46,16 @@ describe ADAL::UserCredential do
 
     describe '#request_params' do
       subject { user_cred.request_params }
+      let(:action) do
+        'http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTRC/IssueFinal'
+      end
       let(:grant_type) { 'grant_type' }
       let(:token) { 'token' }
       let(:wstrust_url) { 'https://ghi.jkl/' }
 
       before(:each) do
         expect_any_instance_of(ADAL::MexRequest).to receive(:execute)
-          .and_return(double(wstrust_url: wstrust_url))
+          .and_return(double(wstrust_url: wstrust_url, action: action))
         expect_any_instance_of(ADAL::WSTrustRequest).to receive(:execute)
           .and_return(double(token: token, grant_type: grant_type))
       end

@@ -849,9 +849,9 @@
             </wsa10:EndpointReference>
         </wsdl:port>
         <wsdl:port name="UserNameWSTrustBinding_IWSTrustFeb2005Async" binding="tns:UserNameWSTrustBinding_IWSTrustFeb2005Async">
-            <soap12:address location="https://arvmserver2012.archan.us/adfs/services/trust/2005/usernamemixed"/>
+            <soap12:address location="http://arvmserver2012.archan.us/adfs/services/trust/2005/usernamemixed"/>
             <wsa10:EndpointReference>
-                <wsa10:Address>https://arvmserver2012.archan.us/adfs/services/trust/2005/usernamemixed</wsa10:Address>
+                <wsa10:Address>http://arvmserver2012.archan.us/adfs/services/trust/2005/usernamemixed</wsa10:Address>
             </wsa10:EndpointReference>
         </wsdl:port>
         <wsdl:port name="CustomBinding_IWSTrustFeb2005Async1" binding="tns:CustomBinding_IWSTrustFeb2005Async1">

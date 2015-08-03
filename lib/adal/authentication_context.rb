@@ -50,7 +50,9 @@ module ADAL
     #   An cache that ADAL will use to store access tokens and refresh tokens
     #   in. By default an empty in-memory cache is created. An existing cache
     #   can be used to data persistence.
-    def initialize(authority_host, tenant, options = {})
+    def initialize(authority_host = Authority::WORLD_WIDE_AUTHORITY,
+                   tenant = Authority::COMMON_TENANT,
+                   options = {})
       fail_if_arguments_nil(authority_host, tenant)
       validate_authority = options[:validate_authority] || false
       @authority = Authority.new(authority_host, tenant, validate_authority)

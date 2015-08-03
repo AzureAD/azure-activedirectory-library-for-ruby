@@ -28,6 +28,7 @@ module ADAL
     include Logging
 
     AUTHORIZE_PATH = '/oauth2/authorize'
+    COMMON_TENANT = 'common'
     DISCOVERY_TEMPLATE = URITemplate.new('https://{host}/common/discovery/' \
       'instance?authorization_endpoint={endpoint}&api-version=1.0')
     TENANT_DISCOVERY_ENDPOINT_KEY = 'tenant_discovery_endpoint'
@@ -54,7 +55,9 @@ module ADAL
     #   The setting that controls whether the Authority instance will check that
     #   it matches a set of know authorities or can dynamically retrieve an
     #   identifying response.
-    def initialize(host, tenant, validate_authority = false)
+    def initialize(host = WORLD_WIDE_AUTHORITY,
+                   tenant = COMMON_TENANT,
+                   validate_authority = false)
       @host = host
       @tenant = tenant
       @validated = !validate_authority

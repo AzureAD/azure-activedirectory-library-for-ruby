@@ -21,12 +21,59 @@ require_relative '../spec_helper'
 include FakeData
 
 describe ADAL::CachedTokenResponse do
-  let(:authority) { AUTHORITY }
+  let(:authority) { ADAL::Authority.new(AUTHORITY, TENANT) }
   let(:client) { ADAL::ClientCredential.new(CLIENT_ID) }
+  let(:expires_in) { 100 }
   let(:resource) { RESOURCE }
   let(:refresh_token) { REFRESH_TOKEN }
   let(:response) do
-    ADAL::SuccessResponse.new(resource: resource, refresh_token: refresh_token)
+    ADAL::SuccessResponse.new(
+      resource: resource, refresh_token: refresh_token, expires_in: expires_in)
+  end
+
+  describe '#initialize' do
+    subject { -> { ADAL::CachedTokenResponse.new(client, authority, resp) } }
+
+    context 'with a SuccessResponse' do
+      let(:resp) { ADAL::SuccessResponse.new }
+
+      it { is_expected.to_not raise_error }
+    end
+
+    context 'with an ErrorResponse' do
+      let(:resp) { ADAL::ErrorResponse.new }
+
+      it { is_expected.to raise_error ArgumentError }
+    end
+  end
+
+  describe '#validate' do
+    subject do
+      ADAL::CachedTokenResponse.new(client, authority, response).validate
+    end
+
+    context 'with a non expired token' do
+      let(:expires_in) { 100 }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'with an expired token' do
+      let(:expires_in) { -100 }
+
+      context 'with no refresh token' do
+        let(:refresh_token) { nil }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'with a refresh token that fails to refresh' do
+        let(:refresh_token) { REFRESH_TOKEN }
+        before(:each) { stub_request(:post, /.*/).and_return(status: 500) }
+
+        it { is_expected.to be_falsey }
+      end
+    end
   end
 
   describe '#mrrt?' do

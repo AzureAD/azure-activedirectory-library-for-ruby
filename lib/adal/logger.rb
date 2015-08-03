@@ -57,6 +57,10 @@ module ADAL
     # This is purely an internal change, the calling mechanism is exactly the
     # same and it only affects ADAL::Logger, not Logger.
 
+    # These methods are skipped by the SimpleCov, because it is not our
+    # responsibility to test the standard library's logging framework.
+
+    #:nocov:
     def error(message = nil, &block)
       add(ERROR, message, @correlation_id, &block)
     end
@@ -76,5 +80,6 @@ module ADAL
     def warn(message = nil, &block)
       add(WARN, message, @correlation_id, &block)
     end
+    #:nocov:
   end
 end

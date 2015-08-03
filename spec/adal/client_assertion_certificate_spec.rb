@@ -23,41 +23,64 @@ include FakeData
 
 describe ADAL::ClientAssertionCertificate do
   describe '#initialize' do
-    before(:each) do
-      @auth = ADAL::Authority.new(AUTHORITY, TENANT)
-      @cert = OpenSSL::X509::Certificate.new
-    end
+    let(:auth) { ADAL::Authority.new(AUTHORITY, TENANT) }
+    let(:cert) { OpenSSL::X509::Certificate.new }
 
     it "should fail if the public key isn't large enough" do
       # The key is an integer number of bytes so we have to subtract at least 8.
       too_few_bits = ADAL::ClientAssertionCertificate::MIN_KEY_SIZE_BITS - 8
       key = OpenSSL::PKey::RSA.new(too_few_bits)
-      @cert.public_key = key.public_key
-      pfx = OpenSSL::PKCS12.create('', '', key, @cert)
+      cert.public_key = key.public_key
+      pfx = OpenSSL::PKCS12.create('', '', key, cert)
       expect do
-        ADAL::ClientAssertionCertificate.new(@auth, CLIENT_ID, pfx)
+        ADAL::ClientAssertionCertificate.new(auth, CLIENT_ID, pfx)
       end.to raise_error(ArgumentError)
     end
 
     it 'should succeed if the public key is the minimum size' do
       just_enough_bits = ADAL::ClientAssertionCertificate::MIN_KEY_SIZE_BITS
       key = OpenSSL::PKey::RSA.new(just_enough_bits)
-      @cert.public_key = key.public_key
-      pfx = OpenSSL::PKCS12.create('', '', key, @cert)
+      cert.public_key = key.public_key
+      pfx = OpenSSL::PKCS12.create('', '', key, cert)
       expect do
-        ADAL::ClientAssertionCertificate.new(@auth, CLIENT_ID, pfx)
+        ADAL::ClientAssertionCertificate.new(auth, CLIENT_ID, pfx)
       end.to_not raise_error
+    end
+
+    it 'should fail if the certificate is not PKCS12' do
+      pfx = 'Not an OpenSSL::PKCS12'
+      expect { ADAL::ClientAssertionCertificate.new(auth, CLIENT_ID, pfx) }
+        .to raise_error ArgumentError
+    end
+
+    it 'should fail if the pkcs12 does not use valid rsa' do
+      key = OpenSSL::PKey::DSA.new 2048
+      cert.public_key = key.public_key
+      pfx = OpenSSL::PKCS12.create('', '', key, cert)
+      expect { ADAL::ClientAssertionCertificate.new(auth, CLIENT_ID, pfx) }
+        .to raise_error ArgumentError
+    end
+
+    it 'should fail if the pkcs12 does not use valid x509' do
+      key = OpenSSL::PKey::RSA.new 2048
+      cert.public_key = key.public_key
+      pfx = OpenSSL::PKCS12.create('', '', key, cert)
+
+      # In practice, no one would ever do this. But we do check for it just in
+      # case.
+      pfx.instance_variable_set(:@certificate, 'Not an x509 certificate')
+      expect { ADAL::ClientAssertionCertificate.new(auth, CLIENT_ID, pfx) }
+        .to raise_error ArgumentError
     end
   end
 
   describe '#request_params' do
     ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365
-
+    let(:cert) { OpenSSL::X509::Certificate.new }
     before(:each) do
       key = OpenSSL::PKey::RSA.new 2048
-      @cert = OpenSSL::X509::Certificate.new
-      @cert.public_key = key.public_key
-      @pfx = OpenSSL::PKCS12.create('', '', key, @cert)
+      cert.public_key = key.public_key
+      @pfx = OpenSSL::PKCS12.create('', '', key, cert)
       @assertion_cert = ADAL::ClientAssertionCertificate.new(
         ADAL::Authority.new(AUTHORITY, TENANT), CLIENT_ID, @pfx)
     end
@@ -77,7 +100,7 @@ describe ADAL::ClientAssertionCertificate do
     it 'should have an assertion that is a decodable JWT' do
       expect do
         JWT.decode(@assertion_cert.request_params[:client_assertion],
-                   @cert.public_key,
+                   cert.public_key,
                    options: { verify_not_before: false })
       end.to_not raise_error
     end

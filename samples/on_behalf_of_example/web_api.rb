@@ -27,9 +27,8 @@ RESOURCE = 'https://graph.windows.net'
 CLIENT_ID = 'your client id here'
 CLIENT_SECRET = 'your client secret here'
 
-@@ctx = ADAL::AuthenticationContext.new(AUTHORITY_HOST, TENANT)
-@@client_cred = ADAL::ClientCredential.new(CLIENT_ID, CLIENT_SECRET)
-
+set :client_cred, ADAL::ClientCredential.new(CLIENT_ID, CLIENT_SECRET)
+set :ctx, ADAL::AuthenticationContext.new(AUTHORITY_HOST, TENANT)
 set :port, 44_321
 
 before do
@@ -62,6 +61,6 @@ end
 # @return String
 #   An access token for the designated resource.
 def exchange_tokens(access_token)
-  @@ctx.acquire_token_for_user(
-    RESOURCE, @@client_cred, ADAL::UserAssertion.new(access_token))
+  settings.ctx.acquire_token_for_user(
+    RESOURCE, settings.client_cred, ADAL::UserAssertion.new(access_token))
 end

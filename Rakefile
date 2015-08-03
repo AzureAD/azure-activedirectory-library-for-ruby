@@ -26,6 +26,9 @@ RSpec::Core::RakeTask.new(:spec) do |t|
 end
 
 # This can be run with `bundle exec rake rubocop`.
-RuboCop::RakeTask.new
+RuboCop::RakeTask.new(:rubocop) do |t|
+  t.patterns = `git ls-files`.split("\n").select { |f| f.end_with? '.rb' }
+  t.fail_on_error = false
+end
 
 task default: :spec

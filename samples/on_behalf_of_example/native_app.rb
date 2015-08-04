@@ -35,8 +35,8 @@ WEB_API_ENDPOINT = 'http://localhost:44321/api/graph'
 user_cred = ADAL::UserCredential.new(prompt('Username: '), prompt('Password: '))
 ctx = ADAL::AuthenticationContext.new(AUTHORITY_HOST, TENANT)
 
-token_response = ctx.acquire_token_with_user_credential(
-  WEB_API_RESOURCE, CLIENT_ID, user_cred)
+token_response =
+  ctx.acquire_token_for_user(WEB_API_RESOURCE, CLIENT_ID, user_cred)
 
 web_api_uri = URI(WEB_API_ENDPOINT)
 headers = { 'Bearer' => token_response.access_token }

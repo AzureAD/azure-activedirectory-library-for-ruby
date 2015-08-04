@@ -50,7 +50,9 @@ module ADAL
     #   An cache that ADAL will use to store access tokens and refresh tokens
     #   in. By default an empty in-memory cache is created. An existing cache
     #   can be used to data persistence.
-    def initialize(authority_host, tenant, options = {})
+    def initialize(authority_host = Authority::WORLD_WIDE_AUTHORITY,
+                   tenant = Authority::COMMON_TENANT,
+                   options = {})
       fail_if_arguments_nil(authority_host, tenant)
       validate_authority = options[:validate_authority] || false
       @authority = Authority.new(authority_host, tenant, validate_authority)
@@ -114,56 +116,37 @@ module ADAL
     end
 
     ##
-    # Gets an access token using a username and password for either a federated
-    # or a managed user.
-    #
-    # @param String resource
-    #   The resource being requested.
-    # @param String|ClientCredential|ClientAssertion|ClientAssertionCertificate
-    #   The client application can be validated in four different manners,
-    #   depending on the OAuth flow. This object must support request_params or
-    #   be a String containing the client id.
-    # @param UserCredential
-    #   The username and password wrapped in an ADAL::UserCredential.
-    # @return TokenResponse
-    def acquire_token_with_user_credential(resource, client_cred, user_cred)
-      fail_if_arguments_nil(resource, client_cred, user_cred)
-      token_request_for(client_cred)
-        .get_with_user_credential(user_cred, resource)
-    end
-
-    ##
     # Gets an acccess token with a previously acquired user token.
+    # Gets an access token for a specific user. This method is relevant for
+    # three authentication scenarios:
+    #
+    # 1. Username/Password flow:
+    # Pass in the username and password wrapped in an ADAL::UserCredential.
+    #
+    # 2. On-Behalf-Of flow:
+    # This allows web services to accept access tokens users and then exchange
+    # them for access tokens for a different resource. Note that to use this
+    # flow you must properly configure permissions settings in the Azure web
+    # portal. Pass in the access token wrapped in an ADAL::UserAssertion.
+    #
+    # 3. User Identifier flow:
+    # This will not make any network connections but will merely check the cache
+    # for existing tokens matching the request. Pass in the `user_id` field of
+    # a previously acquired token wrapped in an ADAL::UserIdentifier.
     #
     # @param String resource
     #   The intended recipient of the requested token.
     # @param ClientCredential|ClientAssertion|ClientAssertionCertificate
     #   An object that validates the client application by adding
     #   #request_params to the OAuth request.
-    # @param UserAssertion
-    #   The previously acquire user token.
+    # @param UserAssertion|UserCredential|UserIdentifier
+    #   An object that validates the client that the requested access token is
+    #   for. See the description above of the various flows.
     # @return TokenResponse
-    def acquire_token_on_behalf(resource, client_cred, user_assertion)
-      fail_if_arguments_nil(resource, client_cred, user_assertion)
+    def acquire_token_for_user(resource, client_cred, user)
+      fail_if_arguments_nil(resource, client_cred, user)
       token_request_for(client_cred)
-        .get_with_user_credential(user_assertion, resource)
-    end
-
-    ##
-    # Gets a security token without prompting for user credentials but instead
-    # just supplying an identifier.
-    #
-    # @param String resource
-    #   The intended recipient of the requested token.
-    # @param ClientCredential|ClientAssertion|ClientAssertionCertificate
-    #   An object that validates the client application by adding
-    #   #request_params to the OAuth request.
-    # @param UserIdentifier user_id
-    #   The identifier of the user that the token is being requested for.
-    # @return TokenResponse
-    def acquire_token_with_user_identifier(resource, client_cred, user_id)
-      fail_if_arguments_nil(resource, client_cred, user_id)
-      fail NotImplementedError
+        .get_with_user_credential(user, resource)
     end
 
     ##

@@ -15,7 +15,6 @@
 # governing permissions and limitations under the License.
 #-------------------------------------------------------------------------------
 
-require_relative './support/fake_auth_endpoint'
 require_relative './support/fake_token_endpoint'
 
 require 'simplecov'
@@ -40,7 +39,6 @@ RSpec.configure do |config|
     # Any network requests matching these RegExps will be redirected to the mock
     # Sinatra servers in $DIR/spec/support. Any network requests that don't
     # match will attempt to access the network and raise exceptions.
-    stub_request(:post, %r{oauth2/authorize}).to_rack(FakeAuthEndpoint)
     stub_request(:post, %r{oauth2/token}).to_rack(FakeTokenEndpoint)
   end
 

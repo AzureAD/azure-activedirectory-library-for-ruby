@@ -28,9 +28,9 @@ describe ADAL::CacheDriver do
   let(:success_response) { ADAL::SuccessResponse.new }
 
   describe '#add' do
-    context 'with an empty memory cache' do
-      let(:token_cache) { ADAL::MemoryCache.new }
+    let(:token_cache) { ADAL::MemoryCache.new }
 
+    context 'with an empty memory cache' do
       before(:each) { driver.add(success_response) }
 
       it 'should leave the cache with exactly one entry' do
@@ -44,8 +44,6 @@ describe ADAL::CacheDriver do
     end
 
     context 'when the cache already contains the entry' do
-      let(:token_cache) { ADAL::MemoryCache.new }
-
       before(:each) do
         driver.add(success_response)
         driver.add(success_response)
@@ -57,6 +55,26 @@ describe ADAL::CacheDriver do
 
       it 'should leave the cache with the same number of entries' do
         expect(token_cache.entries.size).to eq 1
+      end
+    end
+
+    context 'when the cache contains non-matching entries' do
+      let(:token1) { ADAL::SuccessResponse.new(upn: 'user1') }
+      let(:token2) { ADAL::SuccessResponse.new(upn: 'user2') }
+      before(:each) do
+        driver.add(token1)
+        driver.add(token2)
+        driver.add(
+          ADAL::SuccessResponse.new(
+            refresh_token: REFRESH_TOKEN, resource: RESOURCE, upn: 'user1'))
+      end
+
+      it 'should update the refresh tokens of the matching entries' do
+        expect(token1.refresh_token).to eq(REFRESH_TOKEN)
+      end
+
+      it 'should not update the refresh tokens of the non-matching entries' do
+        expect(token2.refresh_token).to be nil
       end
     end
   end

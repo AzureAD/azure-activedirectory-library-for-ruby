@@ -28,6 +28,7 @@ module ADAL
     include Logging
 
     AUTHORIZE_PATH = '/oauth2/authorize'
+    COMMON_TENANT = 'common'
     DISCOVERY_TEMPLATE = URITemplate.new('https://{host}/common/discovery/' \
       'instance?authorization_endpoint={endpoint}&api-version=1.0')
     TENANT_DISCOVERY_ENDPOINT_KEY = 'tenant_discovery_endpoint'
@@ -54,7 +55,9 @@ module ADAL
     #   The setting that controls whether the Authority instance will check that
     #   it matches a set of know authorities or can dynamically retrieve an
     #   identifying response.
-    def initialize(host, tenant, validate_authority = false)
+    def initialize(host = WORLD_WIDE_AUTHORITY,
+                   tenant = COMMON_TENANT,
+                   validate_authority = false)
       @host = host
       @tenant = tenant
       @validated = !validate_authority
@@ -69,7 +72,8 @@ module ADAL
     #   Query parameters that will added to the endpoint.
     # @return [URI]
     def authorize_endpoint(params = nil)
-      if params.nil?
+      params = params.select { |_, v| !v.nil? } if params.respond_to? :select
+      if params.nil? || params.empty?
         URI::HTTPS.build(host: @host, path: '/' + @tenant + AUTHORIZE_PATH)
       else
         URI::HTTPS.build(host: @host,
@@ -121,14 +125,12 @@ module ADAL
     #   The tenant discovery endpoint, if found. Otherwise nil.
     def validated_dynamically?
       logger.verbose("Attempting instance discovery at: #{discovery_uri}.")
-      response = JSON.parse(Net::HTTP.get(discovery_uri))
-      unless response.key? TENANT_DISCOVERY_ENDPOINT_KEY
-        logger.error('Received unexpected response from instance discovery ' \
-                     "endpoint: #{response}. Unable to validate dynamically.")
-        return
+      http_response = Net::HTTP.get(discovery_uri)
+      if http_response.nil?
+        logger.error('Dynamic validation received no response from endpoint.')
+        return false
       end
-      logger.verbose('Authority validated via dynamic instance discovery.')
-      response[TENANT_DISCOVERY_ENDPOINT_KEY]
+      parse_dynamic_validation(JSON.parse(http_response))
     end
 
     # @return [Boolean]
@@ -139,6 +141,20 @@ module ADAL
         logger.verbose('Authority validated via static instance discovery.')
       end
       found_it
+    end
+
+    private
+
+    # @param Hash
+    # @return Boolean
+    def parse_dynamic_validation(response)
+      unless response.key? TENANT_DISCOVERY_ENDPOINT_KEY
+        logger.error('Received unexpected response from instance discovery ' \
+                     "endpoint: #{response}. Unable to validate dynamically.")
+        return false
+      end
+      logger.verbose('Authority validated via dynamic instance discovery.')
+      response[TENANT_DISCOVERY_ENDPOINT_KEY]
     end
   end
 end

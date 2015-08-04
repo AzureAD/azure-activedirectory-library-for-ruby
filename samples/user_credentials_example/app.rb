@@ -35,7 +35,7 @@ password = prompt 'Password: '
 
 user_cred = ADAL::UserCredential.new(username, password)
 ctx = ADAL::AuthenticationContext.new(AUTHORITY_HOST, TENANT)
-result = ctx.acquire_token_with_user_credential(RESOURCE, CLIENT_ID, user_cred)
+result = ctx.acquire_token_for_user(RESOURCE, CLIENT_ID, user_cred)
 
 case result
 when ADAL::SuccessResponse

@@ -26,6 +26,51 @@ describe ADAL::AuthenticationContext do
   let(:auth_ctx) { ADAL::AuthenticationContext.new(AUTHORITY, TENANT) }
   let(:client_cred) { ADAL::ClientCredential.new(CLIENT_ID, CLIENT_SECRET) }
 
+  describe '#authorization_request_url' do
+    let(:resource) { 'http://graph.windows.net' }
+    let(:client_id) { 'some-client-id' }
+    let(:redirect_uri) { 'http://contoso.com/login' }
+
+    context 'with no extra params' do
+      it 'should produce the correct request url' do
+        authorization_url =
+          auth_ctx.authorization_request_url(resource, client_id, redirect_uri)
+        expect(authorization_url.to_s.strip)
+          .to eq "https://#{AUTHORITY}/#{TENANT}/oauth2/authorize?client_id=" \
+                 "#{client_id}&response_mode=form_post&redirect_uri=http%3A%2" \
+                 'F%2Fcontoso.com%2Flogin&resource=http%3A%2F%2Fgraph.windows' \
+                 '.net&response_type=code'
+      end
+    end
+
+    context 'with extra params' do
+      it 'should produce the correct request url' do
+        params = { foo: :bar }
+        authorization_url = auth_ctx.authorization_request_url(
+          resource, client_id, redirect_uri, params)
+        expect(authorization_url.to_s.strip)
+          .to eq "https://#{AUTHORITY}/#{TENANT}/oauth2/authorize?client_id=" \
+                 "#{client_id}&response_mode=form_post&redirect_uri=http%3A%2" \
+                 'F%2Fcontoso.com%2Flogin&resource=http%3A%2F%2Fgraph.windows' \
+                 '.net&response_type=code&foo=bar'
+      end
+    end
+  end
+
+  describe '#correlation_id=' do
+    let(:correlation_id) { 'correlation_id_1' }
+    let(:user) { ADAL::UserAssertion.new(USER_ASSERTION) }
+
+    it 'should put the correlation id on all request headers' do
+      auth_ctx.correlation_id = correlation_id
+      stub_request(:post, %r{.*#{TENANT}\/oauth2\/token})
+        .with(headers: { 'client-request-id' => correlation_id })
+        .and_return(body: '{"access_token":"my access token"}')
+      result = auth_ctx.acquire_token_for_user(RESOURCE, CLIENT_ID, user)
+      expect(result.access_token).to eq('my access token')
+    end
+  end
+
   describe '#acquire_token_with_authorization_code' do
     it 'should return a SuccessResponse when successful' do
       token_response = auth_ctx.acquire_token_with_authorization_code(
@@ -92,17 +137,17 @@ describe ADAL::AuthenticationContext do
     end
   end
 
-  describe '#acquire_token_on_behalf' do
+  describe '#acquire_token_for_user' do
     context 'with valid parameters' do
       let(:user) { ADAL::UserAssertion.new(USER_ASSERTION) }
-      subject { auth_ctx.acquire_token_on_behalf(RESOURCE, client_cred, user) }
+      subject { auth_ctx.acquire_token_for_user(RESOURCE, client_cred, user) }
 
       it { is_expected.to be_a(ADAL::SuccessResponse) }
     end
 
     context 'with invalid parameters' do
       it 'should fail' do
-        expect { auth_ctx.acquire_token_on_behalf(nil, nil) }
+        expect { auth_ctx.acquire_token_for_user(nil, nil) }
           .to raise_error(ArgumentError)
       end
     end

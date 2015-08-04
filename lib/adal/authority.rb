@@ -72,7 +72,8 @@ module ADAL
     #   Query parameters that will added to the endpoint.
     # @return [URI]
     def authorize_endpoint(params = nil)
-      if params.nil?
+      params = params.select { |_, v| !v.nil? } if params.respond_to? :select
+      if params.nil? || params.empty?
         URI::HTTPS.build(host: @host, path: '/' + @tenant + AUTHORIZE_PATH)
       else
         URI::HTTPS.build(host: @host,

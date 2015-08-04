@@ -64,7 +64,7 @@ We recommend you use the "adal" tag so we can see it! Here is the latest Q&A on 
 
 ## Contributing
 
-All code is licensed under the Apache 2.0 license and we triage actively on GitHub. We enthusiastically welcome contributions and feedback. You can fork the repo and start contributing now.
+All code is licensed under the Apache 2.0 license and we triage actively on GitHub. We enthusiastically welcome contributions and feedback. You can fork the repo and start contributing now. [More details](https://github.com/AzureAD/azure-activedirectory-library-for-ruby/blob/master/contributing.md) about contributing.
 
 
 ## License

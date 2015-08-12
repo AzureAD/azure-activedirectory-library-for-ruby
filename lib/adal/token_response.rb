@@ -17,9 +17,9 @@
 
 require_relative './logging'
 
+require 'digest'
 require 'json'
 require 'jwt'
-require 'openssl'
 require 'securerandom'
 
 module ADAL

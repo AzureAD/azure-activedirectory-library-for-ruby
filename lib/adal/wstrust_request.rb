@@ -21,9 +21,7 @@ require_relative './wstrust_response'
 require_relative './xml_namespaces'
 
 require 'erb'
-require 'openssl'
 require 'securerandom'
-require 'time'
 
 module ADAL
   # A request to a WS-Trust endpoint of an ADFS server. Used to obtain a SAML

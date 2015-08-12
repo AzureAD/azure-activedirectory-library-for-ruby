@@ -22,9 +22,6 @@ require_relative './request_parameters'
 require_relative './token_request'
 require_relative './util'
 
-require 'securerandom'
-require 'uri'
-
 using ADAL::CoreExt
 
 module ADAL

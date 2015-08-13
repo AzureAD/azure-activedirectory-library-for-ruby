@@ -31,11 +31,6 @@ module ADAL
     ID_TOKEN_FIELDS.each { |field| attr_reader field }
     attr_reader :user_id
 
-    # An error that signifies that UserIdentifiers do not contain actual
-    # credentials for users and as such cannot be used in OAuth flows.
-    # They can only be used to retrieve tokens already in the cache.
-    class UserCredentialError < StandardError; end
-
     ##
     # Constructs a new UserIdentifier.
     #
@@ -62,14 +57,12 @@ module ADAL
     end
 
     ##
-    # This will be thrown in the case that the application calls
-    # #acquire_token_for_user with an ADAL::UserIdentifier and a suitable token
-    # cannot be found in the cache. This error should be rescued, and then the
-    # application will need to re-authenticate the user.
+    # These parameters should only be used for cache lookup. This is enforced
+    # by ADAL::TokenRequest.
+    #
+    # @return Hash
     def request_params
-      fail UserCredentialError, 'UserIdentifier cannot be used in OAuth ' \
-                                'flows. It is only intended to be used to ' \
-                                'access tokens that are already in the cache.'
+      { user_id: user_id }
     end
 
     ##
@@ -78,7 +71,11 @@ module ADAL
     # @param UserIdentifier other
     # @return Boolean
     def ==(other)
-      user_id == other.user_id
+      if other.respond_to? :user_id
+        user_id == other.user_id
+      else
+        user_id == other
+      end
     end
   end
 end

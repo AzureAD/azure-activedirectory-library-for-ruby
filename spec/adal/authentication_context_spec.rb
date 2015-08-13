@@ -151,5 +151,31 @@ describe ADAL::AuthenticationContext do
           .to raise_error(ArgumentError)
       end
     end
+
+    context 'with a UserIdentifier' do
+      let(:user) { ADAL::UserIdentifier.new(email: USERNAME) }
+      context 'with a matching token in the cache' do
+        subject { auth_ctx.acquire_token_for_user(RESOURCE, client_cred, user) }
+        before(:each) do
+          @first_response = auth_ctx.acquire_token_with_authorization_code(
+            AUTH_CODE, REDIRECT_URI, client_cred, RESOURCE)
+        end
+
+        it { is_expected.to_not be nil }
+
+        it 'should return the token from the cache' do
+          expect(subject).to eq @first_response
+        end
+      end
+
+      context 'with no matching token in the cache' do
+        subject do
+          -> { auth_ctx.acquire_token_for_user(RESOURCE, client_cred, user) }
+        end
+        it do
+          is_expected.to raise_error ADAL::TokenRequest::UserCredentialError
+        end
+      end
+    end
   end
 end

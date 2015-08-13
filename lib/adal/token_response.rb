@@ -65,13 +65,8 @@ module ADAL
     # endpoint.
     OAUTH_FIELDS = [:access_token, :expires_in, :expires_on, :id_token,
                     :not_before, :refresh_token, :resource, :scope, :token_type]
-    # These fields may or may not be included as a JWT in id_token if it
-    # returned from the token endpoint.
-    ID_TOKEN_FIELDS = [:aud, :iss, :iat, :nbf, :exp, :ver, :tid, :oid, :upn,
-                       :sub, :given_name, :family_name, :name, :amr,
-                       :unique_name, :nonce]
-
-    (OAUTH_FIELDS + ID_TOKEN_FIELDS).each { |field| attr_reader field }
+    OAUTH_FIELDS.each { |field| attr_reader field }
+    attr_reader :user_id
 
     ##
     # Constructs a SuccessResponse from a collection of fields returned from a
@@ -80,7 +75,7 @@ module ADAL
     # @param Hash
     def initialize(fields = {})
       fields.each { |k, v| instance_variable_set("@#{k}", v) }
-      parse_id_token
+      parse_id_token(id_token)
       @expires_on = @expires_in.to_i + Time.now.to_i
       logger.info('Parsed a SuccessResponse with access token digest ' \
                   "#{Digest::SHA256.hexdigest @access_token.to_s} and " \
@@ -89,22 +84,20 @@ module ADAL
     end
 
     ##
-    # Parses the id token into fields, if present.
+    # Parses the raw id token into an ADAL::UserIdentifier.
     #
-    # @optional String alt_id_token
+    # @param String id_token
+    #   The id token to parse
     #   Adds an id token to the token response if one is not present
-    def parse_id_token(alt_id_token = nil)
-      @id_token ||= alt_id_token if alt_id_token
-      return unless id_token
-      logger.verbose('An ID token was returned with the token response, ' \
-                     'attempting to decode.')
-      JWT.decode(id_token.to_s, nil, false).first.each do |k, v|
-        instance_variable_set("@#{k}", v)
+    def parse_id_token(id_token)
+      if id_token.nil?
+        logger.warn('No id token found.')
+        return
       end
-    end
-
-    def user_id
-      @user_id ||= (upn || unique_name || sub || SecureRandom.uuid)
+      logger.verbose('Attempting to decode id token in token response.')
+      claims = JWT.decode(id_token.to_s, nil, false).first
+      @id_token = id_token
+      @user_id = ADAL::UserIdentifier.new(claims || {})
     end
   end
 

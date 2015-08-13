@@ -30,6 +30,11 @@ module ADAL
     include Logging
     include RequestParameters
 
+    # An error that signifies an attempt to perform OAuth with a UserIdentifier.
+    # UserIdentifiers can only be used to retrieve access tokens from the cache,
+    # so if no matching cache token is found, this error is thrown.
+    class UserCredentialError < StandardError; end
+
     # All accepted grant types. This module can be mixed-in to other classes
     # that require them.
     module GrantType
@@ -117,16 +122,24 @@ module ADAL
     ##
     # Gets a token based on possessing the users credentials.
     #
-    # @param UserCredential user_cred
+    # @param UserCredential|UserIdentifier user_cred
     #   Something that can be used to verify the user. Typically a username
-    #   and password.
+    #   and password. If it is a UserIdentifier, only the cache will be checked.
+    #   If a matching token is not there, it will fail.
     # @optional String resource
     #   The resource for which the requested access token will provide access.
     # @return TokenResponse
     def get_with_user_credential(user_cred, resource = nil)
       logger.verbose('TokenRequest getting token with user credential ' \
                      "#{user_cred} and resource #{resource}.")
-      request(user_cred.request_params.merge(RESOURCE => resource))
+      oauth = if user_cred.is_a? UserIdentifier
+                lambda do
+                  fail UserCredentialError,
+                       'UserIdentifier can only be used once there is a ' \
+                       'matching token in the cache.'
+                end
+              end || -> {}
+      request(user_cred.request_params.merge(RESOURCE => resource), &oauth)
     end
 
     private
@@ -147,10 +160,10 @@ module ADAL
     # @param Hash params
     #   Any additional request parameters that should be used.
     # @return TokenResponse
-    def request(params)
+    def request(params, &block)
       cached_token = check_cache(request_params(params))
       return cached_token if cached_token
-      cache_response(request_no_cache(request_params(params)))
+      cache_response(request_no_cache(request_params(params), &block))
     end
 
     ##
@@ -160,6 +173,7 @@ module ADAL
     #   Any additional request parameters that should be used.
     # @return TokenResponse
     def request_no_cache(params)
+      yield if block_given?
       oauth_request(request_params(params)).execute
     end
 

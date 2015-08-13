@@ -36,6 +36,7 @@ module ADAL
     REFRESH_TOKEN = 'refresh_token'.to_sym
     RESOURCE = 'resource'.to_sym
     SCOPE = 'scope'.to_sym
+    UNIQUE_ID = 'unique_id'.to_sym
     USER_ID = 'user_id'.to_sym
     USERNAME = 'username'.to_sym
   end

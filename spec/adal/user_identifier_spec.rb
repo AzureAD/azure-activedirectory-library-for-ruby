@@ -13,8 +13,8 @@ describe ADAL::UserIdentifier do
       let(:claims) do
         { upn: upn, email: email, sub: sub, oid: oid, unique_name: unique_name }
       end
-      it('is displayable') { expect(subject).to be_displayable }
-      it('has the correct user id') { expect(subject.user_id).to eq upn }
+      it('has the correct unique id') { expect(subject.unique_id).to eq oid }
+      it('has the correct displayable id') { expect(subject.displayable_id).to eq upn }
     end
 
     context 'with no upn' do
@@ -23,30 +23,38 @@ describe ADAL::UserIdentifier do
           { email: email, sub: sub, oid: oid, unique_name: unique_name }
         end
         it('is displayable') { expect(subject).to be_displayable }
-        it('has the correct user id') { expect(subject.user_id).to eq email }
+        it('is unique') { expect(subject).to be_unique }
+        it('has the correct unique id') { expect(subject.unique_id).to eq oid }
+        it('has the correct displayable id') { expect(subject.displayable_id).to eq email }
       end
 
       context 'with no email' do
         context 'with a subject' do
           let(:claims) { { sub: sub, oid: oid, unique_name: unique_name } }
-          it('is displayable') { expect(subject).to_not be_displayable }
-          it('has the correct user id') { expect(subject.user_id).to eq sub }
+          it('is not displayable') { expect(subject).to_not be_displayable }
+          it('is unique') { expect(subject).to be_unique }
+          it('has the correct unique id') { expect(subject.unique_id).to eq oid }
+          it('has the correct displayable id') { expect(subject.displayable_id).to be_nil }
         end
 
-        context 'with no subject' do
-          context 'with an oid' do
-            let(:claims) { { oid: oid, unique_name: unique_name } }
+        context 'with no oid' do
+          context 'with a subject' do
+            let(:claims) { { sub: sub, unique_name: unique_name } }
             it('is displayable') { expect(subject).to_not be_displayable }
-            it('has the correct user id') { expect(subject.user_id).to eq oid }
+            it('is unique') { expect(subject).to be_unique }
+            it('has the correct unique id') { expect(subject.unique_id).to eq sub }
+            it('has the correct displayable id') { expect(subject.displayable_id).to be_nil }
           end
 
           context 'with no oid' do
-            context 'with a unique_name' do
-              let(:claims) { { unique_name: unique_name } }
-              it('is displayable') { expect(subject).to be_displayable }
-              it 'has the correct user id' do
-                expect(subject.user_id).to eq unique_name
-              end
+            let(:claims) { {} }
+            it('is not displayable') { expect(subject).to_not be_displayable }
+            it('is not unique') { expect(subject).to_not be_unique }
+            it 'has the correct unique id' do
+              expect(subject.unique_id).to be_nil
+            end
+            it 'has the correct displayable id' do
+              expect(subject.unique_id).to be_nil
             end
           end
         end

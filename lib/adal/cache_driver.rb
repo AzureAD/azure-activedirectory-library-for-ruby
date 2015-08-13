@@ -29,7 +29,10 @@ module ADAL
     include Logging
     include RequestParameters
 
-    FIELDS = { user_id: USER_ID, username: USER_ID, resource: RESOURCE }
+    FIELDS = { displayable__id: USER_ID,
+               unique_id: UNIQUE_ID,
+               username: USER_ID,
+               resource: RESOURCE }
 
     ##
     # Constructs a CacheDriver to interact with a token cache.

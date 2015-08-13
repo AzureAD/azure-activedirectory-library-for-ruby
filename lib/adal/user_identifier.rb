@@ -29,44 +29,59 @@ module ADAL
                        :sub, :given_name, :family_name, :name, :amr,
                        :unique_name, :nonce, :email]
     ID_TOKEN_FIELDS.each { |field| attr_reader field }
-    attr_reader :user_id
+    attr_reader :unique_id
+    attr_reader :displayable_id
+    attr_reader :type
 
-    ##
-    # Constructs an ADAL::UserIdentifier based from the string representation
-    # of the user id. This allows for a simple means of saving ids in a data
-    # store without the overhead of serialization
-    #
-    # @param String id
-    # @return ADAL::UserIdentifier
-    def self.from_user_id(id)
-      ADAL::UserIdentifier.new(upn: id)
+    module Type
+      UNIQUE_ID = :UNIQUE_ID
+      DISPLAYABLE_ID = :DISPLAYABLE_ID
     end
 
     ##
-    # Constructs a new UserIdentifier.
+    # Creates a UserIdentifier with a specific type. Used for cache lookups.
+    # Matches .NET ADAL implementation.
+    #
+    # @param String id
+    # @param UserIdentifier::Type
+    # @return ADAL::UserIdentifier
+    def self.create(id, type)
+      case type
+      when Type::UNIQUE_ID
+        ADAL::UserIdentifier.new(type: type, unique_id: id)
+      when TYPE::DISPLAYABLE_ID
+        ADAL::UserIdentifier.new(type: type, displayable_id: id)
+      end
+    end
+
+    ##
+    # Constructs a new UserIdentifier from a set of claims. Developers should
+    # not use this method. Instead, please use ::create(id, type) to specify
+    # the user id and the type.
     #
     # @param Hash claims
     #   Claims from an id token. The exact claims will vary, so whatever is not
     #   found in the claims will be nil.
     def initialize(claims)
       claims.each { |k, v| instance_variable_set("@#{k}", v) }
-      # This logic is consistent with the other ADAL libraries.
-      @user_id = upn || email
-      return (@displayable = true) if @user_id
-      @user_id = sub || oid
-      return (@displyable = false) if @user_id
-      @user_id = unique_name
-      return (@displayable = true) if @user_id
-      @user_id = SecureRandom.uuid
-      @displayable = false
+      @unique_id = oid || sub || unique_id
+      @displayable_id = upn || email || displayable_id
     end
 
     ##
-    # Whether or not the user_id field is reasonably human-readable.
+    # Does the UserIdentifier contain a displayable id?
     #
     # @return Boolean
     def displayable?
-      @displayable
+      !@displayable_id.nil?
+    end
+
+    ##
+    # Does the UserIdentifier contain a unique id
+    #
+    # @return Boolean
+    def unique?
+      !@unique_id.nil?
     end
 
     ##
@@ -75,7 +90,8 @@ module ADAL
     #
     # @return Hash
     def request_params
-      { user_id: user_id }
+      { unique_id: unique_id,
+        displayable_id: displayable_id }
     end
 
     ##
@@ -84,10 +100,12 @@ module ADAL
     # @param UserIdentifier other
     # @return Boolean
     def ==(other)
-      if other.respond_to? :user_id
-        user_id == other.user_id
+      if other.respond_to?(:unique_id) && other.unique_id
+        unique_id == other.unique_id
+      elsif other.respond_to?(:displayable_id) && other.displayable_id
+        displayable_id == other.displayable_id
       else
-        user_id == other
+        (self.equal? other) || displayable_id == other
       end
     end
   end

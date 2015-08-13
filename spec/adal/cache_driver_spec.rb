@@ -91,12 +91,12 @@ describe ADAL::CacheDriver do
     let(:expiry) { 100 }
     let(:response1) do
       ADAL::SuccessResponse.new(resource: resource1,
-                                user_id: user1,
+                                user_info: user1,
                                 expires_in: expiry)
     end
     let(:response2) do
       ADAL::SuccessResponse.new(resource: resource1,
-                                user_id: user2,
+                                user_info: user2,
                                 expires_in: expiry,
                                 refresh_token: REFRESH_TOKEN)
     end
@@ -105,7 +105,7 @@ describe ADAL::CacheDriver do
       driver.add(response2)
     end
 
-    let(:query) { { username: user, resource: resource } }
+    let(:query) { { user_info: user, resource: resource } }
     subject { driver.find(query) }
 
     context 'with a user that is not in the cache' do

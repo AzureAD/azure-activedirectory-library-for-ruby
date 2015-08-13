@@ -66,7 +66,7 @@ module ADAL
     OAUTH_FIELDS = [:access_token, :expires_in, :expires_on, :id_token,
                     :not_before, :refresh_token, :resource, :scope, :token_type]
     OAUTH_FIELDS.each { |field| attr_reader field }
-    attr_reader :user_id
+    attr_reader :user_info
 
     ##
     # Constructs a SuccessResponse from a collection of fields returned from a
@@ -84,8 +84,8 @@ module ADAL
     end
 
     ##
-    # Parses the raw id token into an ADAL::UserIdentifier.
-    # If the id token is missing, an ADAL::UserIdentifier will still be
+    # Parses the raw id token into an ADAL::UserInformation.
+    # If the id token is missing, an ADAL::UserInformation will still be
     # generated, it just won't contain any displayable information.
     #
     # @param String id_token
@@ -94,13 +94,13 @@ module ADAL
     def parse_id_token(id_token)
       if id_token.nil?
         logger.warn('No id token found.')
-        @user_id ||= ADAL::UserIdentifier.new({ unique_id: SecureRandom.uuid })
+        @user_info ||= ADAL::UserInformation.new({ unique_id: SecureRandom.uuid })
         return
       end
       logger.verbose('Attempting to decode id token in token response.')
       claims = JWT.decode(id_token.to_s, nil, false).first
       @id_token = id_token
-      @user_id = ADAL::UserIdentifier.new(claims)
+      @user_info = ADAL::UserInformation.new(claims)
     end
   end
 

@@ -29,9 +29,8 @@ module ADAL
     include Logging
     include RequestParameters
 
-    FIELDS = { displayable__id: USER_ID,
-               unique_id: UNIQUE_ID,
-               username: USER_ID,
+    FIELDS = { user_info: USER_INFO,
+               username: USERNAME,
                resource: RESOURCE }
 
     ##
@@ -100,7 +99,7 @@ module ADAL
       logger.verbose("Searching cache for tokens by keys: #{query.keys}.")
       @token_cache.find do |entry|
         query.map do |k, v|
-          (entry.respond_to? k.to_sym) && (entry.send(k.to_sym) == v)
+          (entry.respond_to? k.to_sym) && (v == entry.send(k.to_sym))
         end.reduce(:&)
       end
     end

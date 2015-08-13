@@ -153,7 +153,7 @@ describe ADAL::AuthenticationContext do
     end
 
     context 'with a UserIdentifier' do
-      let(:user) { ADAL::UserIdentifier.new(email: USERNAME) }
+      let(:user) { ADAL::UserIdentifier.new(USERNAME, :DISPLAYABLE_ID) }
       context 'with a matching token in the cache' do
         subject { auth_ctx.acquire_token_for_user(RESOURCE, client_cred, user) }
         before(:each) do

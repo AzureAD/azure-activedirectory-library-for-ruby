@@ -26,17 +26,19 @@ module ADAL
     attr_reader :displayable_id
 
     ##
-    # Constructs a new UserIdentifier from a set of claims. Developers should
-    # not use this method. Instead, please use ::create(id, type) to specify
-    # the user id and the type.
+    # Constructs a new UserInformation.
     #
     # @param Hash claims
     #   Claims from an id token. The exact claims will vary, so whatever is not
     #   found in the claims will be nil.
     def initialize(claims)
       claims.each { |k, v| instance_variable_set("@#{k}", v) }
-      @unique_id = oid || sub
+      @unique_id = oid || sub || unique_id
       @displayable_id = upn || email
+    end
+
+    def ==(other)
+      unique_id == other.unique_id && displayable_id == other.displayable_id
     end
   end
 end

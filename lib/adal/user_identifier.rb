@@ -16,19 +16,13 @@
 #-------------------------------------------------------------------------------
 
 module ADAL
-  # Identifier for users in the cache. Also useful for accessing the personal
-  # info from an id token.
+  # Identifier for users in the cache.
   #
   # Ideally, the application will first use a different OAuth flow, such as the
-  # Authorization Code flow, to acquire an ADAL::SuccessResponse. Then, they can
-  # extract the ADAL::UserIdentifier from the response as `response.user_id` and
-  # user it for future calls for tokens, and the cache will handle refreshing
-  # the access tokens when they expire.
+  # Authorization Code flow, to acquire an ADAL::SuccessResponse. Then, it can
+  # create ADAL::UserIdentifier to query the cache which will refresh tokens as
+  # necessary.
   class UserIdentifier
-    ID_TOKEN_FIELDS = [:aud, :iss, :iat, :nbf, :exp, :ver, :tid, :oid, :upn,
-                       :sub, :given_name, :family_name, :name, :amr,
-                       :unique_name, :nonce, :email]
-    ID_TOKEN_FIELDS.each { |field| attr_reader field }
     attr_reader :id
     attr_reader :type
 
@@ -36,6 +30,7 @@ module ADAL
       UNIQUE_ID = :UNIQUE_ID
       DISPLAYABLE_ID = :DISPLAYABLE_ID
     end
+    include Type
 
     ##
     # Creates a UserIdentifier with a specific type. Used for cache lookups.
@@ -58,12 +53,7 @@ module ADAL
     #
     # @return Hash
     def request_params
-      case type
-      when Type::UNIQUE_ID
-        { unique_id: id }
-      when Type::DISPLAYABLE_ID
-        { displayable_id: id }
-      end
+      { user_info: self }
     end
 
     ##
@@ -72,7 +62,7 @@ module ADAL
     # @param UserIdentifier other
     # @return Boolean
     def ==(other)
-      case other.class
+      case other
       when UserIdentifier
         self.equal? other
       when UserInformation
@@ -80,8 +70,6 @@ module ADAL
           (type == DISPLAYABLE_ID && id == other.displayable_id)
       when String
         @id == other
-      else
-        false
       end
     end
   end

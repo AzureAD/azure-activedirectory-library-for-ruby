@@ -48,8 +48,8 @@ module ADAL
     # @param CachedTokenResponse other
     # @return Boolean
     def can_refresh?(other)
-      mrrt? && (authority == other.authority) && (user_id == other.user_id) &&
-        (client_id == other.client_id)
+      mrrt? && (authority == other.authority) &&
+        (user_info == other.user_info) && (client_id == other.client_id)
     end
 
     ##

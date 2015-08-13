@@ -32,6 +32,17 @@ module ADAL
     attr_reader :user_id
 
     ##
+    # Constructs an ADAL::UserIdentifier based from the string representation
+    # of the user id. This allows for a simple means of saving ids in a data
+    # store without the overhead of serialization
+    #
+    # @param String id
+    # @return ADAL::UserIdentifier
+    def self.from_user_id(id)
+      ADAL::UserIdentifier.new(upn: id)
+    end
+
+    ##
     # Constructs a new UserIdentifier.
     #
     # @param Hash claims

@@ -57,6 +57,8 @@ module ADAL
       return (@displyable = false) if @user_id
       @user_id = unique_name
       return (@displayable = true) if @user_id
+      @user_id = SecureRandom.uuid
+      @displayable = false
     end
 
     ##

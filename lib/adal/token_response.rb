@@ -85,6 +85,8 @@ module ADAL
 
     ##
     # Parses the raw id token into an ADAL::UserIdentifier.
+    # If the id token is missing, an ADAL::UserIdentifier will still be
+    # generated, it just won't contain any displayable information.
     #
     # @param String id_token
     #   The id token to parse
@@ -92,6 +94,7 @@ module ADAL
     def parse_id_token(id_token)
       if id_token.nil?
         logger.warn('No id token found.')
+        @user_id ||= ADAL::UserIdentifier.new({})
         return
       end
       logger.verbose('Attempting to decode id token in token response.')

@@ -29,8 +29,7 @@ module ADAL
                        :sub, :given_name, :family_name, :name, :amr,
                        :unique_name, :nonce, :email]
     ID_TOKEN_FIELDS.each { |field| attr_reader field }
-    attr_reader :unique_id
-    attr_reader :displayable_id
+    attr_reader :id
     attr_reader :type
 
     module Type
@@ -45,43 +44,12 @@ module ADAL
     # @param String id
     # @param UserIdentifier::Type
     # @return ADAL::UserIdentifier
-    def self.create(id, type)
-      case type
-      when Type::UNIQUE_ID
-        ADAL::UserIdentifier.new(type: type, unique_id: id)
-      when TYPE::DISPLAYABLE_ID
-        ADAL::UserIdentifier.new(type: type, displayable_id: id)
+    def initialize(id, type)
+      unless [UNIQUE_ID, DISPLAYABLE_ID].include? type
+        fail ArgumentError, 'type must be an ADAL::UserIdentifier::Type.'
       end
-    end
-
-    ##
-    # Constructs a new UserIdentifier from a set of claims. Developers should
-    # not use this method. Instead, please use ::create(id, type) to specify
-    # the user id and the type.
-    #
-    # @param Hash claims
-    #   Claims from an id token. The exact claims will vary, so whatever is not
-    #   found in the claims will be nil.
-    def initialize(claims)
-      claims.each { |k, v| instance_variable_set("@#{k}", v) }
-      @unique_id = oid || sub || unique_id
-      @displayable_id = upn || email || displayable_id
-    end
-
-    ##
-    # Does the UserIdentifier contain a displayable id?
-    #
-    # @return Boolean
-    def displayable?
-      !@displayable_id.nil?
-    end
-
-    ##
-    # Does the UserIdentifier contain a unique id
-    #
-    # @return Boolean
-    def unique?
-      !@unique_id.nil?
+      @id = id
+      @type = type
     end
 
     ##
@@ -90,22 +58,30 @@ module ADAL
     #
     # @return Hash
     def request_params
-      { unique_id: unique_id,
-        displayable_id: displayable_id }
+      case type
+      when Type::UNIQUE_ID
+        { unique_id: id }
+      when Type::DISPLAYABLE_ID
+        { displayable_id: id }
+      end
     end
 
     ##
-    # Overrides comparison operator.
+    # Overrides comparison operator for cache lookups
     #
     # @param UserIdentifier other
     # @return Boolean
     def ==(other)
-      if other.respond_to?(:unique_id) && other.unique_id
-        unique_id == other.unique_id
-      elsif other.respond_to?(:displayable_id) && other.displayable_id
-        displayable_id == other.displayable_id
+      case other.class
+      when UserIdentifier
+        self.equal? other
+      when UserInformation
+        (type == UNIQUE_ID && id == other.unique_id) ||
+          (type == DISPLAYABLE_ID && id == other.displayable_id)
+      when String
+        @id == other
       else
-        (self.equal? other) || displayable_id == other
+        false
       end
     end
   end

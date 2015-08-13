@@ -16,42 +16,69 @@
 #-------------------------------------------------------------------------------
 
 module ADAL
-  # Identifier for users for flows that don't require users to explicity log in.
+  # Identifier for users in the cache. Also useful for accessing the personal
+  # info from an id token.
+  #
+  # Ideally, the application will first use a different OAuth flow, such as the
+  # Authorization Code flow, to acquire an ADAL::SuccessResponse. Then, they can
+  # extract the ADAL::UserIdentifier from the response as `response.user_id` and
+  # user it for future calls for tokens, and the cache will handle refreshing
+  # the access tokens when they expire.
   class UserIdentifier
-    # All supported user identifier types. Any developer wishing to instantiate
-    # this class can use this module as a mix-in or refer to the symbols
-    # directly.
-    module Type
-      OPTIONAL_DISPLAYABLE_ID = :optional_displayable_id
-      REQUIRED_DISPLAYABLE_ID = :required_displayable_id
-      UNIQUE_ID = :unique_id
-    end
-    attr_reader :id
-    attr_reader :type
+    ID_TOKEN_FIELDS = [:aud, :iss, :iat, :nbf, :exp, :ver, :tid, :oid, :upn,
+                       :sub, :given_name, :family_name, :name, :amr,
+                       :unique_name, :nonce, :email]
+    ID_TOKEN_FIELDS.each { |field| attr_reader field }
+    attr_reader :user_id
 
-    USER_IDENTIFIER_TYPES = [Type::OPTIONAL_DISPLAYABLE_ID,
-                             Type::REQUIRED_DISPLAYABLE_ID,
-                             Type::UNIQUE_ID]
+    # An error that signifies that UserIdentifiers do not contain actual
+    # credentials for users and as such cannot be used in OAuth flows.
+    # They can only be used to retrieve tokens already in the cache.
+    class UserCredentialError < StandardError; end
 
     ##
     # Constructs a new UserIdentifier.
     #
-    # @param String id
-    #   The raw user identifier.
-    # @param UserIdentifierType
-    #   The type from the mix-in module UserIdentifier::Type.
-    def initialize(id, type)
-      unless USER_IDENTIFIER_TYPES.include? type
-        fail ArgumentError, 'Unrecognized user identifier type'
-      end
-
-      @id = id
-      @type = type
+    # @param Hash claims
+    #   Claims from an id token. The exact claims will vary, so whatever is not
+    #   found in the claims will be nil.
+    def initialize(claims)
+      claims.each { |k, v| instance_variable_set("@#{k}", v) }
+      # This logic is consistent with the other ADAL libraries.
+      @user_id = upn || email
+      return (@displayable = true) if @user_id
+      @user_id = sub || oid
+      return (@displyable = false) if @user_id
+      @user_id = unique_name
+      return (@displayable = true) if @user_id
     end
 
-    # The relevant OAuth parameters.
+    ##
+    # Whether or not the user_id field is reasonably human-readable.
+    #
+    # @return Boolean
+    def displayable?
+      @displayable
+    end
+
+    ##
+    # This will be thrown in the case that the application calls
+    # #acquire_token_for_user with an ADAL::UserIdentifier and a suitable token
+    # cannot be found in the cache. This error should be rescued, and then the
+    # application will need to re-authenticate the user.
     def request_params
-      fail NotImplementedError
+      fail UserCredentialError, 'UserIdentifier cannot be used in OAuth ' \
+                                'flows. It is only intended to be used to ' \
+                                'access tokens that are already in the cache.'
+    end
+
+    ##
+    # Overrides comparison operator.
+    #
+    # @param UserIdentifier other
+    # @return Boolean
+    def ==(other)
+      user_id == other.user_id
     end
   end
 end

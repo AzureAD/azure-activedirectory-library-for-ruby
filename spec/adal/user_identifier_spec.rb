@@ -13,7 +13,6 @@
 #
 # See the Apache License, Version 2.0 for the specific language
 # governing permissions and limitations under the License.
-#require_relative '../spec_helper'
 
 require_relative '../spec_helper'
 
@@ -35,7 +34,7 @@ describe ADAL::UserIdentifier do
     let(:type) { ADAL::UserIdentifier::UNIQUE_ID }
     let(:user_id) { ADAL::UserIdentifier.new(id, type) }
     subject { user_id.request_params }
-    it { is_expected.to eq({ user_info: user_id }) }
+    it { is_expected.to eq(user_info: user_id) }
   end
 
   describe '==' do

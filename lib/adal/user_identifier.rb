@@ -26,6 +26,8 @@ module ADAL
     attr_reader :id
     attr_reader :type
 
+    # Displayable IDs are human readable (eg email addresses) while Unique Ids
+    # are generally random UUIDs.
     module Type
       UNIQUE_ID = :UNIQUE_ID
       DISPLAYABLE_ID = :DISPLAYABLE_ID

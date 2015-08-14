@@ -80,7 +80,11 @@ module ADAL
     # @param JSON json
     # @return MemoryCache
     def self.from_json(json)
-      entries = JSON.parse(json)
+      cache = MemoryCache.new
+      cache.entries = JSON.parse(json).map do |e|
+        CachedTokenResponse.from_json(e)
+      end
+      cache
     end
   end
 end

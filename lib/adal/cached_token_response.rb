@@ -67,7 +67,7 @@ module ADAL
       json = JSON.parse(json) if json.instance_of? String
       CachedTokenResponse.new(json['client_id'],
                               Authority.new(*json['authority']),
-                              SuccessResponse.new(fields['token_response']))
+                              SuccessResponse.new(json['token_response']))
     end
 
     ##

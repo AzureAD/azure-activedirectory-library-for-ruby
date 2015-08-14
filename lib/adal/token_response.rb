@@ -67,6 +67,7 @@ module ADAL
                     :not_before, :refresh_token, :resource, :scope, :token_type]
     OAUTH_FIELDS.each { |field| attr_reader field }
     attr_reader :user_info
+    attr_reader :fields
 
     ##
     # Constructs a SuccessResponse from a collection of fields returned from a
@@ -74,6 +75,7 @@ module ADAL
     #
     # @param Hash
     def initialize(fields = {})
+      @fields = fields
       fields.each { |k, v| instance_variable_set("@#{k}", v) }
       parse_id_token(id_token)
       @expires_on = @expires_in.to_i + Time.now.to_i
@@ -81,6 +83,18 @@ module ADAL
                   "#{Digest::SHA256.hexdigest @access_token.to_s} and " \
                   'refresh token digest ' \
                   "#{Digest::SHA256.hexdigest @refresh_token.to_s}.")
+    end
+
+    ##
+    # Converts the fields that were used to create this token response into
+    # a JSON string. This is helpful for storing then in a database.
+    #
+    # @param JSON::Ext::Generator::State
+    #   We don't care about this, because the JSON representation of this
+    #   object does not depend on the fields before it.
+    # @return String
+    def to_json(_ = nil)
+      JSON.unparse(fields)
     end
 
     ##

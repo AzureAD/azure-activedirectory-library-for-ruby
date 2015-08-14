@@ -37,5 +37,24 @@ module ADAL
     def request_params
       { CLIENT_ID => @client_id, CLIENT_SECRET => @client_secret }
     end
+
+    ##
+    # Converts the fields in this object into a JSON string.
+    #
+    # @return String
+    def to_json(_ = nil)
+      JSON.unparse([client_id, client_secret])
+    end
+
+    ##
+    # Reconstructs an object from JSOn that was serialized with
+    # ClientCredential#to_json.
+    #
+    # @param Array json
+    # @return ClientCredential
+    def self.from_json(json)
+      json = JSON.parse(json) if json.instance_of? String
+      ClientCredential.new(*json)
+    end
   end
 end

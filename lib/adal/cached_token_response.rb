@@ -19,7 +19,6 @@ module ADAL
   # Proxy object for a token response with metadata.
   class CachedTokenResponse
     attr_reader :authority
-    attr_reader :client
     attr_reader :client_id
     attr_reader :token_response
 
@@ -37,9 +36,38 @@ module ADAL
         fail ArgumentError, 'Only SuccessResponses can be cached.'
       end
       @authority = authority
-      @client = client
-      @client_id = client.client_id
+      if client.respond_to? :client_id
+        @client_id = client.client_id
+      else
+        @client_id = client
+      end
       @token_response = token_response
+    end
+
+    ##
+    # Converts the fields in this object and its proxied SuccessResponse into
+    # a JSON string.
+    #
+    # @param JSON::Ext::Generator::State
+    #   We don't care about the state, but JSON::unparse requires this.
+    # @return String
+    def to_json(_ = nil)
+      JSON.unparse(authority: [authority.host, authority.tenant],
+                   client_id: client_id,
+                   token_response: token_response)
+    end
+
+    ##
+    # Reconstructs an object from JSON that was serialized with
+    # CachedTokenResponse#to_json.
+    #
+    # @param JSON raw_json
+    # @return CachedTokenResponse
+    def self.from_json(json)
+      json = JSON.parse(json) if json.instance_of? String
+      CachedTokenResponse.new(json['client_id'],
+                              Authority.new(*json['authority']),
+                              SuccessResponse.new(fields['token_response']))
     end
 
     ##
@@ -95,7 +123,7 @@ module ADAL
     # @return TokenResponse
     def refresh(new_resource = resource)
       token_response = TokenRequest
-                       .new(authority, client)
+                       .new(authority, ADAL::ClientCredential.new(client_id))
                        .get_with_refresh_token(refresh_token, new_resource)
       if token_response.instance_of? SuccessResponse
         token_response.parse_id_token(id_token)

@@ -128,8 +128,7 @@ module ADAL
     #
     # 3. User Identifier flow:
     # This will not make any network connections but will merely check the cache
-    # for existing tokens matching the request. Pass in the `user_id` field of
-    # a previously acquired token wrapped in an ADAL::UserIdentifier.
+    # for existing tokens matching the request.
     #
     # @param String resource
     #   The intended recipient of the requested token.

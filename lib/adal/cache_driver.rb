@@ -29,7 +29,9 @@ module ADAL
     include Logging
     include RequestParameters
 
-    FIELDS = { username: USER_ID, resource: RESOURCE }
+    FIELDS = { user_info: USER_INFO,
+               username: USERNAME,
+               resource: RESOURCE }
 
     ##
     # Constructs a CacheDriver to interact with a token cache.
@@ -97,7 +99,7 @@ module ADAL
       logger.verbose("Searching cache for tokens by keys: #{query.keys}.")
       @token_cache.find do |entry|
         query.map do |k, v|
-          (entry.respond_to? k.to_sym) && (entry.send(k.to_sym) == v)
+          (entry.respond_to? k.to_sym) && (v == entry.send(k.to_sym))
         end.reduce(:&)
       end
     end

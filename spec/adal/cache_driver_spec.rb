@@ -59,14 +59,16 @@ describe ADAL::CacheDriver do
     end
 
     context 'when the cache contains non-matching entries' do
-      let(:token1) { ADAL::SuccessResponse.new(upn: 'user1') }
-      let(:token2) { ADAL::SuccessResponse.new(upn: 'user2') }
+      let(:idtoken1) { JWT.encode({ upn: 'user1' }, '') }
+      let(:idtoken2) { JWT.encode({ upn: 'user2' }, '') }
+      let(:token1) { ADAL::SuccessResponse.new(id_token: idtoken1) }
+      let(:token2) { ADAL::SuccessResponse.new(id_token: idtoken2) }
       before(:each) do
         driver.add(token1)
         driver.add(token2)
-        driver.add(
-          ADAL::SuccessResponse.new(
-            refresh_token: REFRESH_TOKEN, resource: RESOURCE, upn: 'user1'))
+        driver.add(ADAL::SuccessResponse.new(refresh_token: REFRESH_TOKEN,
+                                             resource: RESOURCE,
+                                             id_token: idtoken1))
       end
 
       it 'should update the refresh tokens of the matching entries' do
@@ -89,12 +91,12 @@ describe ADAL::CacheDriver do
     let(:expiry) { 100 }
     let(:response1) do
       ADAL::SuccessResponse.new(resource: resource1,
-                                user_id: user1,
+                                user_info: user1,
                                 expires_in: expiry)
     end
     let(:response2) do
       ADAL::SuccessResponse.new(resource: resource1,
-                                user_id: user2,
+                                user_info: user2,
                                 expires_in: expiry,
                                 refresh_token: REFRESH_TOKEN)
     end
@@ -103,7 +105,7 @@ describe ADAL::CacheDriver do
       driver.add(response2)
     end
 
-    let(:query) { { username: user, resource: resource } }
+    let(:query) { { user_info: user, resource: resource } }
     subject { driver.find(query) }
 
     context 'with a user that is not in the cache' do

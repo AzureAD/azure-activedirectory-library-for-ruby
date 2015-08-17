@@ -64,5 +64,27 @@ module ADAL
     def remove(entries)
       @entries -= Array(entries)
     end
+
+    ##
+    # Converts the cache entries into one JSON string.
+    #
+    # @param JSON::Ext::Generator::State
+    # @return String
+    def to_json(_ = nil)
+      JSON.unparse(entries)
+    end
+
+    ##
+    # Reconstructs the cache from JSON that was previously serialized.
+    #
+    # @param JSON json
+    # @return MemoryCache
+    def self.from_json(json)
+      cache = MemoryCache.new
+      cache.entries = JSON.parse(json).map do |e|
+        CachedTokenResponse.from_json(e)
+      end
+      cache
+    end
   end
 end

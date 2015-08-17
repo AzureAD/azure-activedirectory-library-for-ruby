@@ -18,6 +18,7 @@
 require_relative './fake_data'
 
 require 'json'
+require 'jwt'
 require 'sinatra/base'
 
 # A token endpoint that only recognizes one tenant and client id.
@@ -34,6 +35,7 @@ class FakeTokenEndpoint < Sinatra::Base
   end
 
   DEFAULT_EXPIRATION = 3600
+  DEFAULT_ID_TOKEN = JWT.encode({ email: USERNAME }, '')
   DEFAULT_TOKEN_TYPE = 'Bearer'
 
   post '/:tenant/oauth2/token' do
@@ -73,6 +75,8 @@ class FakeTokenEndpoint < Sinatra::Base
   def successful_oauth_response(opts = {})
     res = { access_token: opts[:access_token] || RETURNED_TOKEN,
             token_type: opts[:token_type] || DEFAULT_TOKEN_TYPE,
+            id_token: opts[:id_token] || DEFAULT_ID_TOKEN,
+            resource: params[:resource],
             expires_in: opts[:expires_in] || DEFAULT_EXPIRATION }
     res[:refresh_token] = opts[:refresh_token] if opts.key? :refresh_token
     res.to_json

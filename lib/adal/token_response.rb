@@ -65,13 +65,9 @@ module ADAL
     # endpoint.
     OAUTH_FIELDS = [:access_token, :expires_in, :expires_on, :id_token,
                     :not_before, :refresh_token, :resource, :scope, :token_type]
-    # These fields may or may not be included as a JWT in id_token if it
-    # returned from the token endpoint.
-    ID_TOKEN_FIELDS = [:aud, :iss, :iat, :nbf, :exp, :ver, :tid, :oid, :upn,
-                       :sub, :given_name, :family_name, :name, :amr,
-                       :unique_name, :nonce]
-
-    (OAUTH_FIELDS + ID_TOKEN_FIELDS).each { |field| attr_reader field }
+    OAUTH_FIELDS.each { |field| attr_reader field }
+    attr_reader :user_info
+    attr_reader :fields
 
     ##
     # Constructs a SuccessResponse from a collection of fields returned from a
@@ -79,8 +75,9 @@ module ADAL
     #
     # @param Hash
     def initialize(fields = {})
+      @fields = fields
       fields.each { |k, v| instance_variable_set("@#{k}", v) }
-      parse_id_token
+      parse_id_token(id_token)
       @expires_on = @expires_in.to_i + Time.now.to_i
       logger.info('Parsed a SuccessResponse with access token digest ' \
                   "#{Digest::SHA256.hexdigest @access_token.to_s} and " \
@@ -89,22 +86,35 @@ module ADAL
     end
 
     ##
-    # Parses the id token into fields, if present.
+    # Converts the fields that were used to create this token response into
+    # a JSON string. This is helpful for storing then in a database.
     #
-    # @optional String alt_id_token
-    #   Adds an id token to the token response if one is not present
-    def parse_id_token(alt_id_token = nil)
-      @id_token ||= alt_id_token if alt_id_token
-      return unless id_token
-      logger.verbose('An ID token was returned with the token response, ' \
-                     'attempting to decode.')
-      JWT.decode(id_token.to_s, nil, false).first.each do |k, v|
-        instance_variable_set("@#{k}", v)
-      end
+    # @param JSON::Ext::Generator::State
+    #   We don't care about this, because the JSON representation of this
+    #   object does not depend on the fields before it.
+    # @return String
+    def to_json(_ = nil)
+      JSON.unparse(fields)
     end
 
-    def user_id
-      @user_id ||= (upn || unique_name || sub || SecureRandom.uuid)
+    ##
+    # Parses the raw id token into an ADAL::UserInformation.
+    # If the id token is missing, an ADAL::UserInformation will still be
+    # generated, it just won't contain any displayable information.
+    #
+    # @param String id_token
+    #   The id token to parse
+    #   Adds an id token to the token response if one is not present
+    def parse_id_token(id_token)
+      if id_token.nil?
+        logger.warn('No id token found.')
+        @user_info ||= ADAL::UserInformation.new(unique_id: SecureRandom.uuid)
+        return
+      end
+      logger.verbose('Attempting to decode id token in token response.')
+      claims = JWT.decode(id_token.to_s, nil, false).first
+      @id_token = id_token
+      @user_info = ADAL::UserInformation.new(claims)
     end
   end
 

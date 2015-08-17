@@ -16,42 +16,63 @@
 #-------------------------------------------------------------------------------
 
 module ADAL
-  # Identifier for users for flows that don't require users to explicity log in.
+  # Identifier for users in the cache.
+  #
+  # Ideally, the application will first use a different OAuth flow, such as the
+  # Authorization Code flow, to acquire an ADAL::SuccessResponse. Then, it can
+  # create ADAL::UserIdentifier to query the cache which will refresh tokens as
+  # necessary.
   class UserIdentifier
-    # All supported user identifier types. Any developer wishing to instantiate
-    # this class can use this module as a mix-in or refer to the symbols
-    # directly.
-    module Type
-      OPTIONAL_DISPLAYABLE_ID = :optional_displayable_id
-      REQUIRED_DISPLAYABLE_ID = :required_displayable_id
-      UNIQUE_ID = :unique_id
-    end
     attr_reader :id
     attr_reader :type
 
-    USER_IDENTIFIER_TYPES = [Type::OPTIONAL_DISPLAYABLE_ID,
-                             Type::REQUIRED_DISPLAYABLE_ID,
-                             Type::UNIQUE_ID]
+    # Displayable IDs are human readable (eg email addresses) while Unique Ids
+    # are generally random UUIDs.
+    module Type
+      UNIQUE_ID = :UNIQUE_ID
+      DISPLAYABLE_ID = :DISPLAYABLE_ID
+    end
+    include Type
 
     ##
-    # Constructs a new UserIdentifier.
+    # Creates a UserIdentifier with a specific type. Used for cache lookups.
+    # Matches .NET ADAL implementation.
     #
     # @param String id
-    #   The raw user identifier.
-    # @param UserIdentifierType
-    #   The type from the mix-in module UserIdentifier::Type.
+    # @param UserIdentifier::Type
+    # @return ADAL::UserIdentifier
     def initialize(id, type)
-      unless USER_IDENTIFIER_TYPES.include? type
-        fail ArgumentError, 'Unrecognized user identifier type'
+      unless [UNIQUE_ID, DISPLAYABLE_ID].include? type
+        fail ArgumentError, 'type must be an ADAL::UserIdentifier::Type.'
       end
-
       @id = id
       @type = type
     end
 
-    # The relevant OAuth parameters.
+    ##
+    # These parameters should only be used for cache lookup. This is enforced
+    # by ADAL::TokenRequest.
+    #
+    # @return Hash
     def request_params
-      fail NotImplementedError
+      { user_info: self }
+    end
+
+    ##
+    # Overrides comparison operator for cache lookups
+    #
+    # @param UserIdentifier other
+    # @return Boolean
+    def ==(other)
+      case other
+      when UserIdentifier
+        self.equal? other
+      when UserInformation
+        (type == UNIQUE_ID && id == other.unique_id) ||
+          (type == DISPLAYABLE_ID && id == other.displayable_id)
+      when String
+        @id == other
+      end
     end
   end
 end

@@ -56,9 +56,34 @@ Run Rubocop
 
 `bundle exec rake rubocop`
 
+## Diagnostics
+
+**Logs, correlation ids and timestamps are required with all requests for help in debugging.**
+
+You can configure ADAL to generate log messages that you can use to help diagnose issues. The log outputs are standard to Ruby's built-in logger. An example ADAL log message looks like this:
+
+```
+I, [2015-08-18T06:58:12.767490 #9231]  INFO -- 969f3e30-8f42-4342-b135-f5c754a6b4a8: Multiple WS-Trust endpoints were found in the mex response. Only one was used.
+```
+
+The `I` is a shorthand for `INFO` that makes parsing logs easier. ADAL supports five different logging levels, `VERBOSE`, `INFO`, `WARN`, `ERROR` and `FATAL`. The timestamp is taken from the client machine. The GUID before the message is a correlation id that is used to track logs from the client to the server.
+
+
+To set the lowest log level to output, include something like this in your configuration:
+
+```
+ADAL::Logging.log_level = ADAL::Logger::VERBOSE
+```
+
+By default, ADAL logs are printed to `STDOUT`. To change the log output, pass a Ruby `IO` object to ADAL like this in your configuration:
+
+```
+ADAL::Logging.log_output = File.open('/path/to/adal.logs', 'w')
+```
+
 ## Community Help and Support
 
-We leverage [Stack Overflow](http://stackoverflow.com/) to work with the community on supporting Azure Active Directory and its SDKs, including this one! We highly recommend you ask your questions on Stack Overflow (we're all on there!) Also browser existing issues to see if someone has had your question before.
+We leverage [Stack Overflow](http://stackoverflow.com/) to work with the community on supporting Azure Active Directory and its SDKs, including this one! We highly recommend you ask your questions on Stack Overflow (we're all on there!) Also browse existing issues to see if someone has had your question before.
 
 We recommend you use the "adal" tag so we can see it! Here is the latest Q&A on Stack Overflow for ADAL: [http://stackoverflow.com/questions/tagged/adal](http://stackoverflow.com/questions/tagged/adal)
 

@@ -33,7 +33,7 @@ Gem::Specification.new do |s|
   s.homepage = 'https://msopentech.com'
   s.email = 'msopentech@microsoft.com'
 
-  s.required_ruby_version = '>= 2.0.0'
+  s.required_ruby_version = '>= 2.1.0'
 
   s.add_runtime_dependency 'jwt', '~> 1.5'
   s.add_runtime_dependency 'nokogiri', '~> 1.6'

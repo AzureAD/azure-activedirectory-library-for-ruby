@@ -96,13 +96,14 @@ module ADAL
 
     # @param Nokogiri::XML::Document xml
     # @return String
-    private_class_method def self.format_xml(xml)
+    def self.format_xml(xml)
       xml.to_s.split("\n").map(&:strip).join
     end
+    private_class_method :format_xml
 
     # @param Nokogiri::XML::Document
     # @return [Nokogiri::XML::Element, Nokogiri::XML::Text]
-    private_class_method def self.parse_token(xml, namespace)
+    def self.parse_token(xml, namespace)
       xml.xpath(TOKEN_RESPONSE_XPATH, namespace).select do |node|
         requested_token = node.xpath(SECURITY_TOKEN_XPATH, namespace)
         case requested_token.size
@@ -118,14 +119,16 @@ module ADAL
         end
       end
     end
+    private_class_method :parse_token
 
     # @param Nokogiri::XML::Element token_response_node
     # @return Nokogiri::XML::Text
-    private_class_method def self.parse_token_type(token_response_node)
+    def self.parse_token_type(token_response_node)
       type = token_response_node.xpath(TOKEN_TYPE_XPATH, NAMESPACES).first
       logger.warn('No type in token response node.') if type.nil?
       type
     end
+    private_class_method :parse_token_type
 
     attr_reader :token
 

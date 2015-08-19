@@ -88,7 +88,7 @@ module ADAL
     #
     # @param String challenge
     # @return Hash
-    private_class_method def self.parse_challenge(challenge)
+    def self.parse_challenge(challenge)
       if challenge !~ BEARER_CHALLENGE_VALIDATION
         logger.warn("#{challenge} is not parseable as an RFC6750 OAuth2 " \
                     'challenge.')
@@ -96,6 +96,7 @@ module ADAL
       end
       Hash[challenge.scan(FIRST_KEY_VALUE) + challenge.scan(OTHER_KEY_VALUE)]
     end
+    private_class_method :parse_challenge
 
     ##
     # Constructs a new AuthenticationParameters.

@@ -59,7 +59,7 @@ module ADAL
     # @param Nokogiri::XML::Document xml
     # @param Array[String] policy_ids
     # @return Array[String]
-    private_class_method def self.parse_bindings(xml, policy_ids)
+    def self.parse_bindings(xml, policy_ids)
       matching_bindings = xml.xpath(BINDING_XPATH, NAMESPACES).map do |node|
         reference_uri = node.xpath('./wsp:PolicyReference/@URI', NAMESPACES)
         node.xpath('./@name').to_s if policy_ids.include? reference_uri.to_s
@@ -67,11 +67,12 @@ module ADAL
       fail MexError, 'No matching bindings found.' if matching_bindings.empty?
       matching_bindings
     end
+    private_class_method :parse_bindings
 
     # @param Nokogiri::XML::Document xml
     # @param Array[String] bindings
     # @return Array[[String, String]]
-    private_class_method def self.parse_all_endpoints(xml, bindings)
+    def self.parse_all_endpoints(xml, bindings)
       endpoints = xml.xpath(PORT_XPATH, NAMESPACES).map do |node|
         binding = node.attr('binding').split(':').last
         if bindings.include? binding
@@ -80,11 +81,12 @@ module ADAL
       end.compact
       endpoints
     end
+    private_class_method :parse_all_endpoints
 
     # @param Nokogiri::XML::Document xml
     # @param Array[String] bindings
     # @return [String, String]
-    private_class_method def self.parse_endpoint_and_binding(xml, bindings)
+    def self.parse_endpoint_and_binding(xml, bindings)
       endpoints = parse_all_endpoints(xml, bindings)
       case endpoints.size
       when 0
@@ -96,22 +98,25 @@ module ADAL
       end
       prefer_13(endpoints).first
     end
+    private_class_method :parse_endpoint_and_binding
 
     # @param Nokogiri::XML::Document xml
     # @return Array[String]
-    private_class_method def self.parse_policy_ids(xml)
+    def self.parse_policy_ids(xml)
       policy_ids = xml.xpath(POLICY_ID_XPATH, NAMESPACES)
                    .map { |attr| "\##{attr.value}" }
       fail MexError, 'No username token policy nodes.' if policy_ids.empty?
       policy_ids
     end
+    private_class_method :parse_policy_ids
 
     # @param Array[String, String] endpoints
     # @return Array[String, String] endpoints
-    private_class_method def self.prefer_13(endpoints)
+    def self.prefer_13(endpoints)
       only13 = endpoints.select { |_, b| BINDING_TO_ACTION[b] == WSTRUST_13 }
       only13.empty? ? endpoints : only13
     end
+    private_class_method :prefer_13
 
     attr_reader :action
     attr_reader :wstrust_url

@@ -37,8 +37,10 @@ module ADAL
       end
       @authority = authority
       if client.respond_to? :client_id
+        @client = client
         @client_id = client.client_id
       else
+        @client = ClientCredential.new(client)
         @client_id = client
       end
       @token_response = token_response
@@ -123,7 +125,7 @@ module ADAL
     # @return TokenResponse
     def refresh(new_resource = resource)
       token_response = TokenRequest
-                       .new(authority, ADAL::ClientCredential.new(client_id))
+                       .new(authority, @client)
                        .get_with_refresh_token(refresh_token, new_resource)
       if token_response.instance_of? SuccessResponse
         token_response.parse_id_token(id_token)

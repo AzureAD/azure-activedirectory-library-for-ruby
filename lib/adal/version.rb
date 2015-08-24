@@ -18,8 +18,8 @@
 module ADAL
   # The current ADAL version.
   class Version
-    MAJOR = 0 unless defined? MAJOR
-    MINOR = 1 unless defined? MINOR
+    MAJOR = 1 unless defined? MAJOR
+    MINOR = 0 unless defined? MINOR
     UPDATE = 0 unless defined? UPDATE
 
     class << self

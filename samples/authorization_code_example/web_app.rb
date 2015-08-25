@@ -1,12 +1,19 @@
-# This web app demonstrates the authorization code flow of obtaining access
-# tokens with ADAL.
+#-------------------------------------------------------------------------------
+# # Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 #
-# To run this web app, you need to:
-# 1. Register a web application under your Azure Active Directory account.
-# 2. Replace CLIENT_ID, CLIENT_SECRET and TENANT with your values.
-# 3. Ensure that Ruby and Sinatra are installed on your system.
-# 4. Install ADAL with `gem install adal`.
-# 5. Start Sinatra with `ruby web_app.rb`.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
+# ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A
+# PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
+#
+# See the Apache License, Version 2.0 for the specific language
+# governing permissions and limitations under the License.
+#-------------------------------------------------------------------------------
 
 require 'adal'
 require 'json'
@@ -19,20 +26,35 @@ AUTHORITY = 'login.windows.net'
 CLIENT_ID = 'your_client_id_here'
 CLIENT_SECRET = 'your_client_secret_here'
 RESOURCE = 'https://graph.windows.net'
-SITE_ID = 500_500
 TENANT = 'your_tenant_here.onmicrosoft.com'
 
 # AuthenticationContext is specific to a tenant. Our application only cares
 # about one tenant, so we only need one AuthenticationContext.
 auth_ctx = ADAL::AuthenticationContext.new(AUTHORITY, TENANT)
+
+# ADAL::ClientCredential is one of several ways that you can identify your
+# client application. It contains a client id and a client secret, which are
+# assigned to you by Azure when you register your application.
 client_cred = ADAL::ClientCredential.new(CLIENT_ID, CLIENT_SECRET)
 
+# ADAL supports four logging options: VERBOSE, INFO, WARN and ERROR.
+# They are defined as constants in ADAL::Logger and are used in ADAL::Logging,
+# the mix-in factory module that provides Loggers to the various ADAL classes.
+# By default, log_level = ADAL::Logger::ERROR so only error messages will be
+# displayed.
+ADAL::Logging.log_level = ADAL::Logger::VERBOSE
+
+# ADAL allows you to redirect log outputs to a file or any Ruby object
+# that implements IO. By default they are sent to STDOUT.
+ADAL::Logging.log_output = 'my_adal_logs.log'
+
+# This is Sinatra specific code that allows storing data as a browser cookie.
 configure do
   enable :sessions
   set :session_secret, 'secret'
 end
 
-# Landing page for the web app.
+# Public landing page for the web app.
 get '/' do
   'This is a public page. Anyone can see it.<br/>' \
   'If you have credentials, you can view the protected phone book ' \

@@ -1,23 +1,58 @@
+#-------------------------------------------------------------------------------
+# # Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
+# ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A
+# PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
+#
+# See the Apache License, Version 2.0 for the specific language
+# governing permissions and limitations under the License.
+#-------------------------------------------------------------------------------
+
 require_relative './authority'
+require_relative './core_ext'
 require_relative './memory_cache'
 require_relative './request_parameters'
 require_relative './token_request'
 require_relative './util'
 
-require 'uri'
+using ADAL::CoreExt
 
 module ADAL
-  # Represents a directory in AAD. Can be used for multiple clients, multiple
-  # users, multiple resources and multiple means of authentication. Each
-  # AuthenticationContext is specific to a tenant.
+  # Retrieves authentication tokens from Azure Active Directory and ADFS
+  # services. For most users, this is the primary class to authenticate an
+  # application.
   class AuthenticationContext
     include RequestParameters
     include Util
 
-    def initialize(authority_uri, tenant, options = {})
-      fail_if_arguments_nil(authority_uri, tenant)
-      validate_authority = options [:validate_authority] || false
-      @authority = Authority.new(authority_uri, tenant, validate_authority)
+    ##
+    # Creates a new AuthenticationContext.
+    #
+    # @param String authority_host
+    #   The host name of the authority to verify against, e.g.
+    #   'login.windows.net'.
+    # @param String tenant
+    #   The tenant to authenticate to, e.g. 'contoso.onmicrosoft.com'.
+    # @optional Boolean validate_authority
+    #   Whether the authority should be checked for validity before making
+    #   token requests. Defaults to false.
+    # @optional TokenCache token_cache
+    #   An cache that ADAL will use to store access tokens and refresh tokens
+    #   in. By default an empty in-memory cache is created. An existing cache
+    #   can be used to data persistence.
+    def initialize(authority_host = Authority::WORLD_WIDE_AUTHORITY,
+                   tenant = Authority::COMMON_TENANT,
+                   options = {})
+      fail_if_arguments_nil(authority_host, tenant)
+      validate_authority = options[:validate_authority] || false
+      @authority = Authority.new(authority_host, tenant, validate_authority)
       @token_cache = options[:token_cache] || MemoryCache.new
     end
 
@@ -32,11 +67,10 @@ module ADAL
     # @param ClientCredential|ClientAssertion|ClientAssertionCertificate
     #   An object that validates the client application by adding
     #   #request_params to the OAuth request.
-    # @return [TokenResponse]
+    # @return TokenResponse
     def acquire_token_for_client(resource, client_cred)
       fail_if_arguments_nil(resource, client_cred)
-      TokenRequest.new(@authority, wrap_client_cred(client_cred))
-        .get_for_client(resource)
+      token_request_for(client_cred).get_for_client(resource)
     end
 
     ##
@@ -52,12 +86,12 @@ module ADAL
     #   #request_params to the OAuth request.
     # @optional String resource
     #   The resource being requested.
-    # @return [TokenResponse]
+    # @return TokenResponse
     def acquire_token_with_authorization_code(
       auth_code, redirect_uri, client_cred, resource = nil)
       fail_if_arguments_nil(auth_code, redirect_uri, client_cred)
-      TokenRequest.new(@authority, client_cred).get_with_authorization_code(
-        auth_code, redirect_uri, resource)
+      token_request_for(client_cred)
+        .get_with_authorization_code(auth_code, redirect_uri, resource)
     end
 
     ##
@@ -70,45 +104,45 @@ module ADAL
     #   depending on the OAuth flow. This object must support #request_params.
     # @optional String resource
     #   The resource being requested.
-    # @return [TokenResponse]
+    # @return TokenResponse
     def acquire_token_with_refresh_token(
       refresh_token, client_cred, resource = nil)
       fail_if_arguments_nil(refresh_token, client_cred)
-      TokenRequest.new(@authority, wrap_client_cred(client_cred))
+      token_request_for(client_cred)
         .get_with_refresh_token(refresh_token, resource)
     end
 
     ##
     # Gets an acccess token with a previously acquired user token.
+    # Gets an access token for a specific user. This method is relevant for
+    # three authentication scenarios:
+    #
+    # 1. Username/Password flow:
+    # Pass in the username and password wrapped in an ADAL::UserCredential.
+    #
+    # 2. On-Behalf-Of flow:
+    # This allows web services to accept access tokens users and then exchange
+    # them for access tokens for a different resource. Note that to use this
+    # flow you must properly configure permissions settings in the Azure web
+    # portal. Pass in the access token wrapped in an ADAL::UserAssertion.
+    #
+    # 3. User Identifier flow:
+    # This will not make any network connections but will merely check the cache
+    # for existing tokens matching the request.
     #
     # @param String resource
     #   The intended recipient of the requested token.
     # @param ClientCredential|ClientAssertion|ClientAssertionCertificate
     #   An object that validates the client application by adding
     #   #request_params to the OAuth request.
-    # @param UserAssertion
-    #   The previously acquire user token.
-    # @return [TokenResponse]
-    def acquire_token_on_behalf(resource, client_cred, user_assertion)
-      fail_if_arguments_nil(resource, client_cred, user_assertion)
-      fail NotImplementedError
-    end
-
-    ##
-    # Gets a security token without prompting for user credentials but instead
-    # just supplying an identifier.
-    #
-    # @param String resource
-    #   The intended recipient of the requested token.
-    # @param ClientCredential|ClientAssertion|ClientAssertionCertificate
-    #   An object that validates the client application by adding
-    #   #request_params to the OAuth request.
-    # @param UserIdentifier user_id
-    #   The identifier of the user that the token is being requested for.
-    # @return [TokenResponse]
-    def acquire_token_with_username_identifier(resource, client_cred, user_id)
-      fail_if_arguments_nil(resource, client_cred, user_id)
-      fail NotImplementedError
+    # @param UserAssertion|UserCredential|UserIdentifier
+    #   An object that validates the client that the requested access token is
+    #   for. See the description above of the various flows.
+    # @return TokenResponse
+    def acquire_token_for_user(resource, client_cred, user)
+      fail_if_arguments_nil(resource, client_cred, user)
+      token_request_for(client_cred)
+        .get_with_user_credential(user, resource)
     end
 
     ##
@@ -134,7 +168,23 @@ module ADAL
           response_type: CODE))
     end
 
+    ##
+    # Sets the correlation id that will be used in all future request headers
+    # and logs.
+    #
+    # @param String value
+    #   The UUID to use as the correlation for all subsequent requests.
+    def correlation_id=(value)
+      Logging.correlation_id = value
+    end
+
     private
+
+    # Helper function for creating token requests based on client credentials
+    # and the current authentication context.
+    def token_request_for(client_cred)
+      TokenRequest.new(@authority, wrap_client_cred(client_cred), @token_cache)
+    end
 
     def wrap_client_cred(client_cred)
       if client_cred.is_a? String

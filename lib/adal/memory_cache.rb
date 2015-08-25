@@ -1,30 +1,90 @@
+#-------------------------------------------------------------------------------
+# # Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
+# ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A
+# PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
+#
+# See the Apache License, Version 2.0 for the specific language
+# governing permissions and limitations under the License.
+#-------------------------------------------------------------------------------
+
+require_relative './logging'
+
 module ADAL
   # A simple cache implementation that is not persisted across application runs.
   class MemoryCache
-    # Reload the cache from serialized JSON.
-    def self.from_json(_)
-      fail NotImplementedError
-    end
+    include Logging
 
     def initialize
-      @entries = {}
+      @entries = []
     end
 
-    def add(_entries)
-      fail NotImplementedError
+    attr_accessor :entries
+
+    ##
+    # Adds an array of objects to the cache.
+    #
+    # @param Array
+    #   The entries to add.
+    # @return Array
+    #   The entries after the addition.
+    def add(entries)
+      entries = Array(entries)  # If entries is an array, this is a no-op.
+      old_size = @entries.size
+      @entries |= entries
+      logger.verbose("Added #{entries.size - old_size} new entries to cache.")
     end
 
-    def find(_query)
-      fail NotImplementedError
+    ##
+    # By default, matches all entries.
+    #
+    # @param Block
+    #   A matcher on the token list.
+    # @return Array
+    #   The matching tokens.
+    def find(&query)
+      query ||= proc { true }
+      @entries.select(&query)
     end
 
-    # Serializes the contents of the cache to JSON.
-    def to_json(*)
-      fail NotImplementedError
+    ##
+    # Removes an array of objects from the cache.
+    #
+    # @param Array
+    #   The entries to remove.
+    # @return Array
+    #   The remaining entries.
+    def remove(entries)
+      @entries -= Array(entries)
     end
 
-    def remove(_entries)
-      fail NotImplementedError
+    ##
+    # Converts the cache entries into one JSON string.
+    #
+    # @param JSON::Ext::Generator::State
+    # @return String
+    def to_json(_ = nil)
+      JSON.unparse(entries)
+    end
+
+    ##
+    # Reconstructs the cache from JSON that was previously serialized.
+    #
+    # @param JSON json
+    # @return MemoryCache
+    def self.from_json(json)
+      cache = MemoryCache.new
+      cache.entries = JSON.parse(json).map do |e|
+        CachedTokenResponse.from_json(e)
+      end
+      cache
     end
   end
 end

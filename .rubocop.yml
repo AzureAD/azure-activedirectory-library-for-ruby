@@ -1,0 +1,7 @@
+# This file lists exceptions to the default configuration, which can be found at
+# https://github.com/bbatsov/rubocop/tree/master/config.
+
+AllCops:
+  Exclude:
+    # Ignore XML templates.
+    - '**/*.erb'

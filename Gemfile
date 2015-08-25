@@ -1,19 +1,20 @@
-source "https://rubygems.org"
+#-------------------------------------------------------------------------------
+# # Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
+# ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A
+# PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
+#
+# See the Apache License, Version 2.0 for the specific language
+# governing permissions and limitations under the License.
+#-------------------------------------------------------------------------------
 
-gem 'escape_utils'
-gem 'jwt'
-gem 'openssl'
-gem 'uri_template'
+source 'https://rubygems.org'
 
-group :test do
-  gem 'rspec'
-
-  # Measures test coverages.
-  gem 'simplecov', require: false
-
-  # Used to mock a token endpoint.
-  gem 'sinatra', github: 'sinatra/sinatra'
-
-  # Used to reroute OAuth requests to the mock token endpoint.
-  gem 'webmock'
-end
+gemspec

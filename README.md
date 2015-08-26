@@ -89,9 +89,9 @@ We recommend you use the "adal" tag so we can see it! Here is the latest Q&A on 
 
 ## Contributing
 
-All code is licensed under the Apache 2.0 license and we triage actively on GitHub. We enthusiastically welcome contributions and feedback. You can fork the repo and start contributing now. [More details](https://github.com/AzureAD/azure-activedirectory-library-for-ruby/blob/master/contributing.md) about contributing.
+All code is licensed under the MIT license and we triage actively on GitHub. We enthusiastically welcome contributions and feedback. You can fork the repo and start contributing now. [More details](https://github.com/AzureAD/azure-activedirectory-library-for-ruby/blob/master/contributing.md) about contributing.
 
 
 ## License
 
-Copyright (c) Microsoft Open Technologies, Inc.  All rights reserved. Licensed under the Apache License, Version 2.0 (the "License"); 
+Copyright (c) Microsoft Corporation. Licensed under the MIT License.

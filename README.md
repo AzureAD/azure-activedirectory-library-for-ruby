@@ -1,5 +1,6 @@
 # Windows Azure Active Directory Authentication Library (ADAL) for Ruby
 [![Build Status](https://travis-ci.org/AzureAD/azure-activedirectory-library-for-ruby.png?branch=master)](https://travis-ci.org/AzureAD/azure-activedirectory-library-for-ruby)
+[![Code Climate](https://codeclimate.com/github/AzureAD/azure-activedirectory-library-for-ruby/badges/gpa.svg)](https://codeclimate.com/github/AzureAD/azure-activedirectory-library-for-ruby/badges/gpa.svg)
 
 The ADAL for Ruby library makes it easy for Ruby applications to authenticate to AAD in order to access AAD protected web resources.
 

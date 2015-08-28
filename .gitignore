@@ -1,5 +1,6 @@
 *.swp
 *.gem
+vendor
 Gemfile.lock
 doc
 coverage

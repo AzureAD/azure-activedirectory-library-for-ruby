@@ -24,7 +24,7 @@ require_relative '../../lib/adal'
 require 'sinatra'
 
 # Uncomment this if you want to trace ADAL's execution.
-# ADAL::Logging.log_level = ADAL::Logger::VERBOSE
+# ADAL::Logging.log_level = ADAL::ADLogger::VERBOSE
 
 AUTHORITY_HOST = ADAL::Authority::WORLD_WIDE_AUTHORITY
 TENANT = 'your tenant here.onmicrosoft.com'

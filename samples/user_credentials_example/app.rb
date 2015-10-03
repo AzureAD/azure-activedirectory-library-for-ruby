@@ -23,7 +23,7 @@
 require 'adal'
 
 # This will make ADAL log the various steps of obtaining an access token.
-ADAL::Logging.log_level = ADAL::Logger::VERBOSE
+ADAL::Logging.log_level = ADAL::ADLogger::VERBOSE
 
 AUTHORITY_HOST = ADAL::Authority::WORLD_WIDE_AUTHORITY
 CLIENT_ID = 'your clientid here'

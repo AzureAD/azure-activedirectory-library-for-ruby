@@ -20,8 +20,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-#require_relative './logger'
-
 require 'securerandom'
 
 module ADAL

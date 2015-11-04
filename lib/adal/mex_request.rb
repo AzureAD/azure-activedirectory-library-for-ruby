@@ -20,8 +20,8 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './mex_response'
-require_relative './util'
+#require_relative './mex_response'
+#require_relative './util'
 
 require 'net/http'
 require 'uri'

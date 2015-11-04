@@ -20,10 +20,10 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './logging'
-require_relative './token_request'
-require_relative './util'
-require_relative './xml_namespaces'
+#require_relative './logging'
+#require_relative './token_request'
+#require_relative './util'
+#require_relative './xml_namespaces'
 
 require 'nokogiri'
 

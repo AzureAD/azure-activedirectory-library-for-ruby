@@ -20,10 +20,10 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './logging'
-require_relative './util'
-require_relative './wstrust_response'
-require_relative './xml_namespaces'
+#require_relative './logging'
+#require_relative './util'
+#require_relative './wstrust_response'
+#require_relative './xml_namespaces'
 
 require 'erb'
 require 'securerandom'

@@ -20,8 +20,8 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './jwt_parameters'
-require_relative './logging'
+#require_relative './jwt_parameters'
+#require_relative './logging'
 
 require 'jwt'
 require 'openssl'

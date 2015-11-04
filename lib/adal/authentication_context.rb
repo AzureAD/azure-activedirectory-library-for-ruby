@@ -20,12 +20,12 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './authority'
-require_relative './core_ext'
-require_relative './memory_cache'
-require_relative './request_parameters'
-require_relative './token_request'
-require_relative './util'
+#require_relative './authority'
+#require_relative './core_ext'
+#require_relative './memory_cache'
+#require_relative './request_parameters'
+#require_relative './token_request'
+#require_relative './util'
 
 using ADAL::CoreExt
 

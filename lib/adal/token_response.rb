@@ -20,7 +20,7 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './logging'
+#require_relative './logging'
 
 require 'digest'
 require 'json'

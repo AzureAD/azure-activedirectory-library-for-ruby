@@ -20,7 +20,7 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './logger'
+#require_relative './logger'
 
 require 'securerandom'
 

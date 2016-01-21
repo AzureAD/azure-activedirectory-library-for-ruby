@@ -64,8 +64,7 @@ module ADAL
     def header(certificate)
       x5t = thumbprint(certificate)
       logger.verbose("Creating self signed JWT header with thumbprint: #{x5t}.")
-      { TYPE => TYPE_JWT,
-        ALGORITHM => RS256,
+      { ALGORITHM => RS256,
         THUMBPRINT => x5t }
     end
 
@@ -75,7 +74,7 @@ module ADAL
       expires = now + 60 * SELF_SIGNED_JWT_LIFETIME
       logger.verbose("Creating self signed JWT payload. Expires: #{expires}. " \
                      "NotBefore: #{now}.")
-      { AUDIENCE => @token_endpoint,
+      { AUDIENCE => @token_endpoint.to_s,
         ISSUER => @client_id,
         SUBJECT => @client_id,
         NOT_BEFORE => now.to_i,

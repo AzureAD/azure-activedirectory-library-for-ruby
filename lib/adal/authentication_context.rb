@@ -100,6 +100,24 @@ module ADAL
     end
 
     ##
+    # Gets an access token with a device code.
+    #
+    # @param String device_code
+    #   The device code that was issued by the authorization server.
+    # @param ClientCredential|ClientAssertion|ClientAssertionCertificate
+    #   An object that validates the client application by adding
+    #   #request_params to the OAuth request.
+    # @optional String resource
+    #   The resource being requested.
+    # @return TokenResponse
+    def acquire_token_with_device_code(
+      device_code, client_cred, resource = nil)
+      fail_if_arguments_nil(device_code, client_cred)
+      token_request_for(client_cred)
+        .get_with_device_code(device_code, resource)
+    end
+
+    ##
     # Gets an access token using a previously acquire refresh token.
     #
     # @param String refresh_token

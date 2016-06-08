@@ -140,7 +140,7 @@ module ADAL
       oauth = if user_cred.is_a? UserIdentifier
                 lambda do
                   fail UserCredentialError,
-                       'UserIdentifier can only be used once there is a ' \
+                       'UserIdentifier can only be used if there is a ' \
                        'matching token in the cache.'
                 end
               end || -> {}

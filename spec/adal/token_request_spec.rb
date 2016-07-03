@@ -79,6 +79,45 @@ describe ADAL::TokenRequest do
     end
   end
 
+  describe '#get_with_device_code' do
+    context 'with a matching token in the cache' do
+      before(:each) do
+        ADAL::CacheDriver.new(authority, client, cache).add(token_response)
+      end
+
+      it 'should not make an OAuthRequest' do
+        expect(ADAL::OAuthRequest).to_not receive(:new)
+        token_request.get_with_device_code(
+          DEVICE_CODE, RESOURCE)
+      end
+
+      it 'should retrieve the token response from the cache' do
+        expect(
+          token_request.get_with_device_code(
+            DEVICE_CODE, RESOURCE)
+        ).to eq(token_response)
+      end
+    end
+
+    context 'without a matching token in the cache' do
+      before(:each) do
+        allow(ADAL::OAuthRequest).to receive(:new)
+          .and_return(mock_oauth_request(token_response))
+      end
+
+      it 'should make an OAuthRequest' do
+        expect(ADAL::OAuthRequest).to receive(:new).once
+        token_request.get_with_device_code(DEVICE_CODE)
+      end
+
+      it 'should return the token response from the OAuth flow' do
+        expect(
+          token_request.get_with_device_code(DEVICE_CODE)
+        ).to eq(token_response)
+      end
+    end
+  end
+
   describe '#get_for_client' do
     context 'with a matching token in the cache' do
       before(:each) do

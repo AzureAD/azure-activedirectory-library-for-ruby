@@ -50,6 +50,7 @@ module ADAL
       REFRESH_TOKEN = 'refresh_token'
       SAML1 = 'urn:ietf:params:oauth:grant-type:saml1_1-bearer'
       SAML2 = 'urn:ietf:params:oauth:grant-type:saml2-bearer'
+      DEVICE_CODE = 'device_code'
     end
 
     ##
@@ -104,6 +105,24 @@ module ADAL
       request(CODE => auth_code,
               GRANT_TYPE => GrantType::AUTHORIZATION_CODE,
               REDIRECT_URI => URI.parse(redirect_uri.to_s),
+              RESOURCE => resource)
+    end
+
+    ##
+    # Gets a token based on a previously acquired device code.
+    #
+    # @param String device_code
+    #   A device code that was previously acquired from an
+    #   authentication endpoint.
+    # @optional String resource
+    #   The resource for which the requested access token will provide access.
+    # @return TokenResponse
+    def get_with_device_code(device_code, resource = nil)
+      logger.verbose('TokenRequest getting token with device code ' \
+                     "#{device_code} and " \
+                     "resource #{resource}.")
+      request(CODE => device_code,
+              GRANT_TYPE => GrantType::DEVICE_CODE,
               RESOURCE => resource)
     end
 

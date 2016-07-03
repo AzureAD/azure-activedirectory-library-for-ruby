@@ -25,6 +25,7 @@
 # classes.
 module FakeData
   AUTH_CODE = 'auth_code_1'
+  DEVICE_CODE = 'CA1BCDEF2'
   AUTHORITY = 'login.windows.net'
   ASSERTION = 'header.payload.crypto'
   CLIENT_ID = 'client_id_1'

@@ -79,7 +79,7 @@ module ADAL
     end
 
     ##
-    # Gets an access token with a previously acquire authorization code.
+    # Gets an access token with a previously acquired authorization code.
     #
     # @param String auth_code
     #   The authorization code that was issued by the authorization server.
@@ -100,7 +100,7 @@ module ADAL
     end
 
     ##
-    # Gets an access token using a previously acquire refresh token.
+    # Gets an access token using a previously acquired refresh token.
     #
     # @param String refresh_token
     #   The previously acquired refresh token.

@@ -46,7 +46,7 @@ case result
 when ADAL::SuccessResponse
   puts 'Successfully authenticated with user credentials. Received access ' \
        "token: #{result.access_token}."
-when ADAL::FailureResponse
+when ADAL::ErrorResponse
   puts 'Failed to authenticate with client credentials. Received error: ' \
        "#{result.error} and error description: #{result.error_description}."
 end

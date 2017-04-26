@@ -20,8 +20,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './logging'
-
 require 'digest'
 require 'json'
 require 'jwt'

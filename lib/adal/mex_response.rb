@@ -20,9 +20,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './logging'
-require_relative './xml_namespaces'
-
 require 'nokogiri'
 require 'uri'
 

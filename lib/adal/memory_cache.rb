@@ -20,8 +20,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './logging'
-
 module ADAL
   # A simple cache implementation that is not persisted across application runs.
   class MemoryCache

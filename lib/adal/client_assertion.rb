@@ -20,10 +20,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './request_parameters'
-require_relative './token_request'
-require_relative './util'
-
 module ADAL
   # A client credential that consists of the client id and a JWT bearer
   # assertion. The type is 'urn:ietf:params:oauth:token-type:jwt'.

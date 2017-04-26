@@ -20,9 +20,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './logging'
-require_relative './util'
-
 require 'net/http'
 require 'uri'
 

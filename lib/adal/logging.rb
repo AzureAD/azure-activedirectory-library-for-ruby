@@ -20,8 +20,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './logger'
-
 require 'securerandom'
 
 module ADAL
@@ -29,7 +27,7 @@ module ADAL
   # calling class will need to extend this module. To obtain a logger in
   # instance methods the calling will need to include this Module.
   module Logging
-    DEFAULT_LOG_LEVEL = Logger::ERROR
+    DEFAULT_LOG_LEVEL = ADLogger::ERROR
     DEFAULT_LOG_OUTPUT = STDOUT
 
     @correlation_id = SecureRandom.uuid
@@ -49,10 +47,10 @@ module ADAL
     #
     # Example usage:
     #
-    #     ADAL::Logging.log_level = ADAL::Logger::VERBOSE
+    #     ADAL::Logging.log_level = ADAL::ADLogger::VERBOSE
     #
     def self.log_level=(level)
-      unless Logger::SEVS.map.with_index { |_, i| i }.include? level
+      unless ADLogger::SEVS.map.with_index { |_, i| i }.include? level
         fail ArgumentError, "Invalid log level: #{level}."
       end
       @log_level = level
@@ -90,7 +88,7 @@ module ADAL
     # @param output
     #   STDERR, STDOUT or the file name as a string.
     def logger
-      @logger ||= ADAL::Logger.new(Logging.log_output, Logging.correlation_id)
+      @logger ||= ADAL::ADLogger.new(Logging.log_output, Logging.correlation_id)
       @logger.level = Logging.log_level || DEFAULT_LOG_LEVEL
       @logger
     end

@@ -20,12 +20,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './cache_driver'
-require_relative './logging'
-require_relative './noop_cache'
-require_relative './oauth_request'
-require_relative './request_parameters'
-
 require 'openssl'
 
 module ADAL

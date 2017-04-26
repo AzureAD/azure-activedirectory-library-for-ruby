@@ -20,8 +20,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './token_request'
-
 module ADAL
   # An assertion and its representation type, stored as a JWT for
   # the on-behalf-of flow.

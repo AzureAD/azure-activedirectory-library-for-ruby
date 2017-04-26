@@ -73,7 +73,7 @@ The `I` is a shorthand for `INFO` that makes parsing logs easier. ADAL supports 
 To set the lowest log level to output, include something like this in your configuration:
 
 ```
-ADAL::Logging.log_level = ADAL::Logger::VERBOSE
+ADAL::Logging.log_level = ADAL::ADLogger::VERBOSE
 ```
 
 By default, ADAL logs are printed to `STDOUT`. To change the log output, pass a Ruby `IO` object to ADAL like this in your configuration:

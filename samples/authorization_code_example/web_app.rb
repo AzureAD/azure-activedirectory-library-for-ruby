@@ -43,11 +43,11 @@ auth_ctx = ADAL::AuthenticationContext.new(AUTHORITY, TENANT)
 client_cred = ADAL::ClientCredential.new(CLIENT_ID, CLIENT_SECRET)
 
 # ADAL supports four logging options: VERBOSE, INFO, WARN and ERROR.
-# They are defined as constants in ADAL::Logger and are used in ADAL::Logging,
+# They are defined as constants in ADAL::ADLogger and are used in ADAL::Logging,
 # the mix-in factory module that provides Loggers to the various ADAL classes.
-# By default, log_level = ADAL::Logger::ERROR so only error messages will be
+# By default, log_level = ADAL::ADLogger::ERROR so only error messages will be
 # displayed.
-ADAL::Logging.log_level = ADAL::Logger::VERBOSE
+ADAL::Logging.log_level = ADAL::ADLogger::VERBOSE
 
 # ADAL allows you to redirect log outputs to a file or any Ruby object
 # that implements IO. By default they are sent to STDOUT.

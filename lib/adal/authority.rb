@@ -20,8 +20,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './logging'
-
 require 'json'
 require 'net/http'
 require 'uri'

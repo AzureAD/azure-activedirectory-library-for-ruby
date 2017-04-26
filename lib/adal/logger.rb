@@ -29,11 +29,11 @@ module ADAL
   # The format of a log message is described in the Ruby docs at
   # http://ruby-doc.org/stdlib-2.2.2/libdoc/logger/rdoc/Logger.html as
   # SeverityID, [DateTime #pid] SeverityLabel -- ProgName: message.
-  # SeverityID is the first letter of the severity. In the case of ADAL::Logger
+  # SeverityID is the first letter of the severity. In the case of ADAL::ADLogger
   # that means one of {V, I, W, E, F}. The DateTime object uses the to_s method
   # of DateTime from stdlib which is ISO-8601. The ProgName will be the
   # correlation id if one is sent or absent otherwise.
-  class Logger < Logger
+  class ADLogger < Logger
     SEVS = %w(VERBOSE INFO WARN ERROR FATAL)
     VERBOSE = SEVS.index('VERBOSE')
 
@@ -60,7 +60,7 @@ module ADAL
     # use the message as the message and the progname as the correlation_id.
     #
     # This is purely an internal change, the calling mechanism is exactly the
-    # same and it only affects ADAL::Logger, not Logger.
+    # same and it only affects ADAL::ADLogger, not Logger.
 
     # These methods are skipped by the SimpleCov, because it is not our
     # responsibility to test the standard library's logging framework.

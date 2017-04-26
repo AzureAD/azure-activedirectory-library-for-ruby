@@ -32,15 +32,15 @@ describe ADAL::Logging do
 
     context 'with a valid log level' do
       it 'should not throw an error' do
-        expect { ADAL::Logging.log_level = ADAL::Logger::VERBOSE }
+        expect { ADAL::Logging.log_level = ADAL::ADLogger::VERBOSE }
           .to_not raise_error
-        expect { ADAL::Logging.log_level = ADAL::Logger::INFO }
+        expect { ADAL::Logging.log_level = ADAL::ADLogger::INFO }
           .to_not raise_error
-        expect { ADAL::Logging.log_level = ADAL::Logger::WARN }
+        expect { ADAL::Logging.log_level = ADAL::ADLogger::WARN }
           .to_not raise_error
-        expect { ADAL::Logging.log_level = ADAL::Logger::ERROR }
+        expect { ADAL::Logging.log_level = ADAL::ADLogger::ERROR }
           .to_not raise_error
-        expect { ADAL::Logging.log_level = ADAL::Logger::FATAL }
+        expect { ADAL::Logging.log_level = ADAL::ADLogger::FATAL }
           .to_not raise_error
       end
     end

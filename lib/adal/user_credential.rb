@@ -20,12 +20,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './authority'
-require_relative './logger'
-require_relative './mex_request'
-require_relative './token_request'
-require_relative './wstrust_request'
-
 require 'base64'
 require 'json'
 require 'net/http'

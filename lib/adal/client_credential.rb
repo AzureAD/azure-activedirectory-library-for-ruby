@@ -20,9 +20,6 @@
 # THE SOFTWARE.
 #-------------------------------------------------------------------------------
 
-require_relative './request_parameters'
-require_relative './util'
-
 module ADAL
   # A wrapper object for a client id and secret.
   class ClientCredential

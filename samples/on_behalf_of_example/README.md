@@ -20,7 +20,7 @@ them to your tenant.
 2. Give this application permission to use the web application that you create
    in the next step. (You can't do this step until you've configured the Web
    Application.)
-3. In `web_app.rb`, fill in the tenant, client id and client secret fields.
+3. In `web_api.rb`, fill in the tenant, client id and client secret fields.
 
 ## Configuring the Web Application
 1. In the Azure portal, register a new Native Application. Take note of the

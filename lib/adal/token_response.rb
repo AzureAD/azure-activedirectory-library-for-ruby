@@ -41,7 +41,7 @@ module ADAL
     # @return TokenResponse
     def self.parse(raw_response)
       logger.verbose('Attempting to create a TokenResponse from raw response.')
-      if raw_response.nil?
+      if raw_response.nil? || raw_response.empty?
         ErrorResponse.new
       elsif raw_response['error']
         ErrorResponse.new(JSON.parse(raw_response))

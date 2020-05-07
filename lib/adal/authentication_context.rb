@@ -72,10 +72,11 @@ module ADAL
     # @param ClientCredential|ClientAssertion|ClientAssertionCertificate
     #   An object that validates the client application by adding
     #   #request_params to the OAuth request.
+    # @optional String client_secret
     # @return TokenResponse
-    def acquire_token_for_client(resource, client_cred)
+    def acquire_token_for_client(resource, client_cred, options = {})
       fail_if_arguments_nil(resource, client_cred)
-      token_request_for(client_cred).get_for_client(resource)
+      token_request_for(client_cred, options).get_for_client(resource)
     end
 
     ##
@@ -91,11 +92,12 @@ module ADAL
     #   #request_params to the OAuth request.
     # @optional String resource
     #   The resource being requested.
+    # @optional String client_secret
     # @return TokenResponse
     def acquire_token_with_authorization_code(
-      auth_code, redirect_uri, client_cred, resource = nil)
+      auth_code, redirect_uri, client_cred, resource = nil, options = {})
       fail_if_arguments_nil(auth_code, redirect_uri, client_cred)
-      token_request_for(client_cred)
+      token_request_for(client_cred, options)
         .get_with_authorization_code(auth_code, redirect_uri, resource)
     end
 
@@ -109,11 +111,12 @@ module ADAL
     #   depending on the OAuth flow. This object must support #request_params.
     # @optional String resource
     #   The resource being requested.
+    # @optional String client_secret
     # @return TokenResponse
     def acquire_token_with_refresh_token(
-      refresh_token, client_cred, resource = nil)
+      refresh_token, client_cred, resource = nil, options = {})
       fail_if_arguments_nil(refresh_token, client_cred)
-      token_request_for(client_cred)
+      token_request_for(client_cred, options)
         .get_with_refresh_token(refresh_token, resource)
     end
 
@@ -143,10 +146,11 @@ module ADAL
     # @param UserAssertion|UserCredential|UserIdentifier
     #   An object that validates the client that the requested access token is
     #   for. See the description above of the various flows.
+    # @optional String client_secret
     # @return TokenResponse
-    def acquire_token_for_user(resource, client_cred, user)
+    def acquire_token_for_user(resource, client_cred, user, options = {})
       fail_if_arguments_nil(resource, client_cred, user)
-      token_request_for(client_cred)
+      token_request_for(client_cred, options)
         .get_with_user_credential(user, resource)
     end
 
@@ -187,13 +191,13 @@ module ADAL
 
     # Helper function for creating token requests based on client credentials
     # and the current authentication context.
-    def token_request_for(client_cred)
-      TokenRequest.new(@authority, wrap_client_cred(client_cred), @token_cache)
+    def token_request_for(client_cred, options = {})
+      TokenRequest.new(@authority, wrap_client_cred(client_cred, options), @token_cache)
     end
 
-    def wrap_client_cred(client_cred)
+    def wrap_client_cred(client_cred, options = {})
       if client_cred.is_a? String
-        ClientCredential.new(client_cred)
+        ClientCredential.new(client_cred, options[:client_secret])
       else
         client_cred
       end

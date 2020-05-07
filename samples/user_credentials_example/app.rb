@@ -29,7 +29,7 @@ AUTHORITY_HOST = ADAL::Authority::WORLD_WIDE_AUTHORITY
 CLIENT_ID = 'your clientid here'
 RESOURCE = 'https://graph.windows.net'
 TENANT = 'your tenant here'
-CLIENT_SECURET = 'your clientsecret here'
+CLIENT_SECRET = 'your clientsecret here'
 
 def prompt(*args)
   print(*args)
@@ -41,7 +41,7 @@ password = prompt 'Password: '
 
 user_cred = ADAL::UserCredential.new(username, password)
 ctx = ADAL::AuthenticationContext.new(AUTHORITY_HOST, TENANT)
-result = ctx.acquire_token_for_user(RESOURCE, CLIENT_ID, user_cred, { ADAL::RequestParameters::CLIENT_SECRET => CLIENT_SECURET })
+result = ctx.acquire_token_for_user(RESOURCE, CLIENT_ID, user_cred, { ADAL::RequestParameters::CLIENT_SECRET => CLIENT_SECRET })
 
 case result
 when ADAL::SuccessResponse

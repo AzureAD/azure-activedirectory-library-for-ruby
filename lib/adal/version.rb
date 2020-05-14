@@ -25,7 +25,7 @@ module ADAL
   class Version
     MAJOR = 1 unless defined? MAJOR
     MINOR = 0 unless defined? MINOR
-    UPDATE = 0 unless defined? UPDATE
+    UPDATE = 1 unless defined? UPDATE
 
     class << self
       def to_s

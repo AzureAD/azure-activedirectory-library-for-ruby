@@ -48,5 +48,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rubocop', '~> 0.32'
   s.add_development_dependency 'simplecov', '~> 0.10'
   s.add_development_dependency 'sinatra', '~> 1.4'
-  s.add_development_dependency 'webmock', '~> 1.21'
+  s.add_development_dependency 'webmock', '~> 2.3.2'
 end

@@ -26,6 +26,14 @@ require 'jwt'
 
 include FakeData
 
+module JWT
+  module DefaultOptions
+    DEFAULT_OPTIONS = {
+      algorithms: [ADAL::JwtParameters::RS256]
+    }.freeze
+  end
+end
+
 describe ADAL::SelfSignedJwtFactory do
   describe '#create_and_sign_jwt' do
     before(:each) do

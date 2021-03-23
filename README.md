@@ -1,3 +1,8 @@
+
+
+| [Documentation](https://github.com/AzureAD/azure-activedirectory-library-for-ruby/wiki#documentation) | [Code Samples](https://github.com/AzureAD/azure-activedirectory-library-for-ruby/tree/dev/samples) | [Feedback](https://forms.office.com/r/imDuntJFdz) |
+| --- | --- | --- |
+
 # Windows Azure Active Directory Authentication Library (ADAL) for Ruby
 [![Build Status](https://travis-ci.org/AzureAD/azure-activedirectory-library-for-ruby.png?branch=master)](https://travis-ci.org/AzureAD/azure-activedirectory-library-for-ruby)
 [![Code Climate](https://codeclimate.com/github/AzureAD/azure-activedirectory-library-for-ruby/badges/gpa.svg)](https://codeclimate.com/github/AzureAD/azure-activedirectory-library-for-ruby/badges/gpa.svg)
@@ -87,6 +92,9 @@ ADAL::Logging.log_output = File.open('/path/to/adal.logs', 'w')
 We leverage [Stack Overflow](http://stackoverflow.com/) to work with the community on supporting Azure Active Directory and its SDKs, including this one! We highly recommend you ask your questions on Stack Overflow (we're all on there!) Also browse existing issues to see if someone has had your question before.
 
 We recommend you use the "adal" tag so we can see it! Here is the latest Q&A on Stack Overflow for ADAL: [http://stackoverflow.com/questions/tagged/adal](http://stackoverflow.com/questions/tagged/adal)
+
+## Submit Feedback
+We'd like your thoughts on this library. Please complete [this short survey.](https://forms.office.com/r/imDuntJFdz) 
 
 ## Security Reporting
 
